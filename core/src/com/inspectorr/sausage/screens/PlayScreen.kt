@@ -2,9 +2,11 @@ package com.inspectorr.sausage.screens
 
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.ScreenAdapter
+import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.GL20
 import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.utils.viewport.FitViewport
 import com.badlogic.gdx.utils.viewport.Viewport
 import com.inspectorr.sausage.entities.Paw
@@ -13,6 +15,7 @@ import com.inspectorr.sausage.utils.randomString
 
 class PlayScreen : ScreenAdapter() {
     private lateinit var batch: SpriteBatch
+    private lateinit var shapeRenderer: ShapeRenderer
     private val camera = OrthographicCamera(Gdx.graphics.width.toFloat(), Gdx.graphics.height.toFloat())
 
     private lateinit var sausage: Sausage
@@ -23,14 +26,16 @@ class PlayScreen : ScreenAdapter() {
 
     override fun show() {
         batch = SpriteBatch()
+        shapeRenderer = ShapeRenderer()
         batch.projectionMatrix = camera.combined
+        shapeRenderer.projectionMatrix = camera.combined
         sausage = Sausage(batch)
         addPaw()
     }
 
     private fun addPaw() {
         val key = randomString()
-        paws[key] = Paw(batch, key)
+        paws[key] = Paw(batch, key, shapeRenderer)
     }
 
     private fun clear() {
@@ -66,11 +71,22 @@ class PlayScreen : ScreenAdapter() {
             sausage.stopScreaming()
         }
 
-        print("paws count: ${paws.values.size}\n")
+//        print("paws count: ${paws.values.size}\n")
 
 //        sausage.update(delta)
 
         camera.update()
+    }
+
+    fun handleTouch(screenX: Int, screenY: Int) {
+        val x = screenX - Gdx.graphics.width/2f
+        val y = -screenY + Gdx.graphics.height/2f
+        println("x: $x, y: $y")
+        paws.values.forEach {
+            if (it.shape.contains(x, y)) {
+                it.onTouch()
+            }
+        }
     }
 
     private fun draw() {
@@ -84,10 +100,18 @@ class PlayScreen : ScreenAdapter() {
         batch.end()
     }
 
+    private fun debugDrawObjectBorders() {
+        shapeRenderer.begin(ShapeRenderer.ShapeType.Line)
+        shapeRenderer.color = Color.FIREBRICK
+        paws.values.forEach { it.debugDrawObjectBorder() }
+        shapeRenderer.end()
+    }
+
     override fun render(delta: Float) {
         update(delta)
         clear()
         draw()
+        debugDrawObjectBorders()
     }
 
     override fun resize(width: Int, height: Int) {

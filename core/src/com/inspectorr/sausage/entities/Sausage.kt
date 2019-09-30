@@ -28,7 +28,7 @@ class Sausage(private val batch: SpriteBatch) {
     private val fineToScreamingTexture = Texture(Gdx.files.internal("sausage_fine-to-screaming_256_1-4.png"))
     private val fineToScreamingAnimation = parseAnimation(fineToScreamingTexture, width, height, 4)
 
-    var state = FINE
+    private var state = FINE
     private val animation: Animation<TextureRegion> get() {
         return when (state) {
             FINE -> fineAnimation
