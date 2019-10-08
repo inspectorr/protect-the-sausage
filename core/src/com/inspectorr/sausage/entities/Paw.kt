@@ -89,7 +89,7 @@ class Paw(private val batch: SpriteBatch, val key: String, private val debugShap
     }
 
     private fun moveBack() {
-        var progress = (timer / 1f).pow(2)
+        val progress = (timer / 1f).pow(2)
 
         if (progress >= 1) {
             timer = 0f
@@ -109,8 +109,9 @@ class Paw(private val batch: SpriteBatch, val key: String, private val debugShap
     }
 
     private fun updateShape() {
-        println("$position\n")
+//        println("$position\n")
         shape.apply {
+
             setPosition(position.x, position.y)
             rotation = angle
         }
