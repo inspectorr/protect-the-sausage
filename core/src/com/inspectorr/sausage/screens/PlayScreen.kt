@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.GL20
 import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
+import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.math.Vector2
 import com.inspectorr.sausage.entities.Paw
 import com.inspectorr.sausage.entities.Sausage
@@ -45,7 +46,7 @@ class PlayScreen : ScreenAdapter() {
     }
 
     private var pawTimer = 0f
-    private val pawFreq = 1f
+    private val pawFreq = 2f
 
     private fun update(delta: Float) {
         time += delta
@@ -102,26 +103,30 @@ class PlayScreen : ScreenAdapter() {
 
     class FeedbackPoint(private val point: Vector2, private val shapeRenderer: ShapeRenderer, val key: String) {
         companion object {
-            const val feedbackLength = 0.4f
-            const val pointsCount = 200
-            const val initRadius = 100
-            const val maxPointSize = 7
+            const val feedbackLength = 0.3f
+            const val initPointsCount = 150
+            const val initRadius = 30
+            const val endRadius = 120
+            const val maxPointSize = 20
         }
 
         private val random = Random()
 
         var timeLeft = feedbackLength
         fun draw () {
-            val progress = timeLeft / feedbackLength
+            val progress = Interpolation.pow2In.apply(timeLeft / feedbackLength)
 
-            var radius = (initRadius*progress).toInt()
+            var radius = (initRadius+(endRadius- initRadius)*(1-progress)).toInt()
             if (radius <= 1) radius = 1
 
-            shapeRenderer.color = Color(255f, 0f, 0f, 0.5f)
+            Gdx.gl.glEnable(GL20.GL_BLEND)
+            shapeRenderer.color = Color(255f, 255f, 255f, progress)
             println("$progress\n")
 
+            val pointsCount = (initPointsCount*progress).toInt()
+
             for (i in 0..pointsCount) {
-                val pointSize = random.nextInt(maxPointSize).toFloat()
+                val pointSize = random.nextInt(maxPointSize).toFloat()*progress
 
                 val x = point.x + random.nextInt(radius*2) - radius - pointSize/2f
                 val y = point.y + random.nextInt(radius*2) - radius - pointSize/2f
