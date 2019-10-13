@@ -8,11 +8,10 @@ fun randomInt(maxInt: Int) : Int {
     return random.nextInt(maxInt)
 }
 
-fun randomFloat() : Float  {
-    return random.nextFloat()
+fun randomFloat(maxFloat: Float = 1f) : Float  {
+    return random.nextFloat()*maxFloat
 }
 
-const val length = 10
-fun randomString(): String {
+fun randomString(length: Int = 10): String {
     return (1..length).map { randomInt(9) }.joinToString { "$it" }
 }

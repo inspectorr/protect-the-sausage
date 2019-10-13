@@ -55,10 +55,6 @@ class Sausage(private val batch: SpriteBatch) {
 
     var position = Vector2(-width/2f, -height/2f)
 
-    fun setPosition(x: Float, y: Float) {
-        position = Vector2(x, y)
-    }
-
     private fun getFrame(time: Float): TextureRegion {
         return when (state) {
             FINE -> animation.getKeyFrame(time, true)
@@ -67,9 +63,11 @@ class Sausage(private val batch: SpriteBatch) {
         }
     }
 
+    private val offset = 23f
+
     fun draw(time: Float) {
         val frame = getFrame(time)
-        batch.draw(frame, position.x, position.y)
+        batch.draw(frame, position.x+offset, position.y+offset)
     }
 
 }

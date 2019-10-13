@@ -7,13 +7,11 @@ import com.badlogic.gdx.graphics.GL20
 import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
-import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.math.Vector2
+import com.inspectorr.sausage.entities.FeedbackPoint
 import com.inspectorr.sausage.entities.Paw
 import com.inspectorr.sausage.entities.Sausage
 import com.inspectorr.sausage.utils.randomString
-import java.util.*
-import kotlin.math.pow
 
 class PlayScreen : ScreenAdapter() {
     private lateinit var batch: SpriteBatch
@@ -46,7 +44,7 @@ class PlayScreen : ScreenAdapter() {
     }
 
     private var pawTimer = 0f
-    private val pawFreq = 2f
+    private val pawFreq = 2.5f
 
     private fun update(delta: Float) {
         time += delta
@@ -100,43 +98,6 @@ class PlayScreen : ScreenAdapter() {
     }
 
     private val feedbackPoints = mutableMapOf<String, FeedbackPoint>()
-
-    class FeedbackPoint(private val point: Vector2, private val shapeRenderer: ShapeRenderer, val key: String) {
-        companion object {
-            const val feedbackLength = 0.3f
-            const val initPointsCount = 150
-            const val initRadius = 30
-            const val endRadius = 120
-            const val maxPointSize = 20
-        }
-
-        private val random = Random()
-
-        var timeLeft = feedbackLength
-        fun draw () {
-            val progress = Interpolation.pow2In.apply(timeLeft / feedbackLength)
-
-            var radius = (initRadius+(endRadius- initRadius)*(1-progress)).toInt()
-            if (radius <= 1) radius = 1
-
-            Gdx.gl.glEnable(GL20.GL_BLEND)
-            shapeRenderer.color = Color(255f, 255f, 255f, progress)
-            println("$progress\n")
-
-            val pointsCount = (initPointsCount*progress).toInt()
-
-            for (i in 0..pointsCount) {
-                val pointSize = random.nextInt(maxPointSize).toFloat()*progress
-
-                val x = point.x + random.nextInt(radius*2) - radius - pointSize/2f
-                val y = point.y + random.nextInt(radius*2) - radius - pointSize/2f
-
-                if ((point.x-x).pow(2) + (point.y-y).pow(2) <= radius.toFloat().pow(2)) {
-                    shapeRenderer.rect(x, y, pointSize, pointSize)
-                }
-            }
-        }
-    }
 
     private fun updateTouches(delta: Float) {
         var removeItem = false

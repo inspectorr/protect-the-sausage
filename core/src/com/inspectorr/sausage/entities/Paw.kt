@@ -58,6 +58,7 @@ class Paw(private val batch: SpriteBatch, val key: String, private val debugShap
     enum class State {
         MOVING_CENTER,
         MOVING_BACK,
+        PAUSE
     }
 
     private var state = State.MOVING_CENTER
@@ -66,32 +67,45 @@ class Paw(private val batch: SpriteBatch, val key: String, private val debugShap
         when (state) {
             State.MOVING_CENTER -> moveCenter()
             State.MOVING_BACK -> moveBack()
+            State.PAUSE -> pause()
         }
     }
 
     private val centerSpeed = 0.01f
-
     private fun moveCenter() {
-        position.set(
-                position.x + delta.x*centerSpeed,
-                position.y + delta.y*centerSpeed
-        )
+        position.add(delta.x*centerSpeed,delta.y*centerSpeed)
     }
 
-    private val backSpeed = 0.05f
-
+    private val backSpeed = 0.075f
     private fun moveBack() {
-        position.set(
-                position.x - delta.x*backSpeed,
-                position.y - delta.y*backSpeed
-        )
+        position.add(-delta.x*backSpeed,-delta.y*backSpeed)
+    }
+
+    private var isPaused = false
+    private val pauseLength = 0.5f
+    private var pauseTimer = 0f
+    private fun setPause() {
+        isPaused = true
+        state = State.PAUSE
+        pauseTimer = pauseLength
+    }
+
+    private fun handlePauseTimer(delta: Float) {
+        if (pauseTimer > 0f) pauseTimer -= delta
+    }
+
+    private fun pause() {
+        if (pauseTimer <= 0f) {
+            isPaused = false
+            state = State.MOVING_BACK
+        }
     }
 
     private fun triggerState() {
-        println("distance ${distance(position, Screen.CENTER)}")
-        if (distance(position, Screen.CENTER) < 20) {
-            state = State.MOVING_BACK
+        if (state == State.MOVING_CENTER && !isPaused && distance(position, Screen.CENTER) < 20) {
+            setPause()
         }
+
         if (isOutOfScreen(position)) {
             remove()
         }
@@ -110,6 +124,7 @@ class Paw(private val batch: SpriteBatch, val key: String, private val debugShap
     }
 
     fun update(delta: Float) {
+        handlePauseTimer(delta)
         triggerState()
         action()
         updateShape()
