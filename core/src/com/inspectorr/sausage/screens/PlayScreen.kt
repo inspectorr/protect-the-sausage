@@ -2,22 +2,24 @@ package com.inspectorr.sausage.screens
 
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.ScreenAdapter
-import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.GL20
 import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.math.Vector2
+import com.inspectorr.sausage.entities.Background
 import com.inspectorr.sausage.entities.FeedbackPoint
 import com.inspectorr.sausage.entities.Paw
 import com.inspectorr.sausage.entities.Sausage
+import com.inspectorr.sausage.utils.Screen
 import com.inspectorr.sausage.utils.randomString
 
 class PlayScreen : ScreenAdapter() {
     private lateinit var batch: SpriteBatch
     private lateinit var shapeRenderer: ShapeRenderer
-    private val camera = OrthographicCamera(Gdx.graphics.width.toFloat(), Gdx.graphics.height.toFloat())
+    private val camera = OrthographicCamera(Screen.WIDTH, Screen.HEIGHT)
 
+    private lateinit var background: Background
     private lateinit var sausage: Sausage
 
     private val paws = mutableMapOf<String, Paw>()
@@ -25,11 +27,20 @@ class PlayScreen : ScreenAdapter() {
     private var time = 0f
 
     override fun show() {
+        initCanvas()
+        initEntities()
+    }
+
+    private fun initCanvas() {
         batch = SpriteBatch()
-        shapeRenderer = ShapeRenderer()
         batch.projectionMatrix = camera.combined
+        shapeRenderer = ShapeRenderer()
         shapeRenderer.projectionMatrix = camera.combined
+    }
+
+    private fun initEntities() {
         sausage = Sausage(batch)
+        background = Background(shapeRenderer)
         addPaw()
     }
 
@@ -38,17 +49,15 @@ class PlayScreen : ScreenAdapter() {
         paws[key] = Paw(batch, key, shapeRenderer)
     }
 
-    private fun clear() {
-        Gdx.gl.glClearColor(0f, 0f, 0f, 1f)
-        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT)
-    }
-
     private var pawTimer = 0f
     private val pawFreq = 2.5f
+    private var pawsProgress = 0f
 
     private fun update(delta: Float) {
         time += delta
 
+        // update before renderBatch
+        pawsProgress = 0f
 
         pawTimer += delta
         if (pawTimer > pawFreq) {
@@ -58,24 +67,25 @@ class PlayScreen : ScreenAdapter() {
 
         paws.values.forEach {
             if (it.complete) {
+                it.onRemove()
                 paws.remove(it.key)
                 return
             }
-
             it.update(delta)
+            pawsProgress += it.progress
         }
 
-        if (paws.values.isNotEmpty()) {
-            sausage.scream(delta)
-        } else {
-            sausage.stopScreaming()
+        background.update(pawsProgress)
+
+        sausage.apply {
+            if (paws.values.isNotEmpty()) {
+                scream(delta)
+            } else {
+                stopScreaming()
+            }
         }
 
         updateTouches(delta)
-
-//        print("paws count: ${paws.values.size}\n")
-
-//        sausage.update(delta)
 
         camera.update()
     }
@@ -92,26 +102,24 @@ class PlayScreen : ScreenAdapter() {
         addFeedbackPoint(x, y)
     }
 
+    private val feedbackPoints = mutableMapOf<String, FeedbackPoint>()
+
     private fun addFeedbackPoint(x: Float, y: Float) {
         val key = randomString()
         feedbackPoints[key] = FeedbackPoint(Vector2(x, y), shapeRenderer, key)
     }
 
-    private val feedbackPoints = mutableMapOf<String, FeedbackPoint>()
-
     private fun updateTouches(delta: Float) {
-        var removeItem = false
         var removeKey = ""
+        var shouldRemove = false
         feedbackPoints.values.forEach {
             it.timeLeft -= delta
             if (it.timeLeft <= 0f) {
-                removeItem = true
                 removeKey = it.key
+                shouldRemove = true
             }
         }
-        if (removeItem) {
-            feedbackPoints.remove(removeKey)
-        }
+        if (shouldRemove) feedbackPoints.remove(removeKey)
     }
 
     private fun drawTouchFeedback() {
@@ -120,36 +128,28 @@ class PlayScreen : ScreenAdapter() {
         }
     }
 
-    private fun draw() {
-        batch.begin()
-        //
-
-        sausage.draw(time)
+    private fun drawPaws() {
         paws.values.forEach { it.draw(camera) }
-
-        //
-        batch.end()
     }
 
-    private fun debugDrawObjectBorders() {
-        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled)
-        shapeRenderer.color = Color.FIREBRICK
+    private fun clear() {
+        Gdx.gl.glClearColor(0f, 0f, 0f, 1f)
+        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT)
+        Gdx.gl.glEnable(GL20.GL_BLEND)
+        Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA)
+    }
 
-//        paws.values.forEach { it.debugDrawObjectBorder() }
-
+    fun draw() {
+        background.draw()
+        sausage.draw(time)
+        drawPaws()
         drawTouchFeedback()
-
-        shapeRenderer.end()
     }
 
     override fun render(delta: Float) {
         update(delta)
+//        println(pawsProgress)
         clear()
         draw()
-        debugDrawObjectBorders()
-    }
-
-    override fun resize(width: Int, height: Int) {
-//        viewport.update(width, height)
     }
 }

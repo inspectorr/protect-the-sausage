@@ -12,6 +12,7 @@ import com.inspectorr.sausage.utils.Screen
 import com.inspectorr.sausage.utils.distance
 import com.inspectorr.sausage.utils.isOutOfScreen
 import com.inspectorr.sausage.utils.randomInt
+import kotlin.math.round
 
 class Paw(private val batch: SpriteBatch, val key: String, private val debugShapeRenderer: ShapeRenderer) {
     private lateinit var position: Vector2
@@ -22,13 +23,13 @@ class Paw(private val batch: SpriteBatch, val key: String, private val debugShap
     private val textureWidth = texture.regionWidth.toFloat()
     private val textureHeight = texture.regionHeight.toFloat()
 
-    private val randomX = { randomInt(Gdx.graphics.width).toFloat() - Screen.RIGHT }
-    private val randomY = { randomInt(Gdx.graphics.height).toFloat() - Screen.TOP }
+    private fun randomX() = randomInt(Gdx.graphics.width).toFloat() - Screen.RIGHT
+    private fun randomY() = randomInt(Gdx.graphics.height).toFloat() - Screen.TOP
 
-    private val randomPosTop = { Vector2(randomX(), Screen.TOP) }
-    private val randomPosRight = { Vector2(Screen.RIGHT, randomY()) }
-    private val randomPosBottom = { Vector2(randomX(), Screen.BOTTOM) }
-    private val randomPosLeft = { Vector2(Screen.LEFT, randomY()) }
+    private fun randomPosTop() = Vector2(randomX(), Screen.TOP)
+    private fun randomPosRight() = Vector2(Screen.RIGHT, randomY())
+    private fun randomPosBottom() = Vector2(randomX(), Screen.BOTTOM)
+    private fun randomPosLeft() = Vector2(Screen.LEFT, randomY())
 
     val shape = Polygon()
 
@@ -130,9 +131,15 @@ class Paw(private val batch: SpriteBatch, val key: String, private val debugShap
         updateShape()
     }
 
-    private val angle: Float get() = atan2(position.y, position.x)*(180/Math.PI).toFloat()
+    val angle: Float get() = atan2(position.y, position.x)*(180/Math.PI).toFloat()
+    val progress: Float get() {
+        val posToDelta = position.x / delta.x
+        val progress = if (posToDelta + 1 > 0f) posToDelta + 1 else 0f
+        return round(progress * 100f) / 100f
+    }
 
     fun draw(camera: OrthographicCamera) {
+        batch.begin()
         batch.draw(
              texture,
              shape.x, shape.y,
@@ -141,6 +148,7 @@ class Paw(private val batch: SpriteBatch, val key: String, private val debugShap
              shape.scaleX, shape.scaleY,
              shape.rotation
         )
+        batch.end()
     }
 
     fun debugDrawObjectBorder() {
@@ -153,4 +161,8 @@ class Paw(private val batch: SpriteBatch, val key: String, private val debugShap
 
     var complete = false
     val remove = { complete = true }
+
+    fun onRemove() {
+
+    }
 }

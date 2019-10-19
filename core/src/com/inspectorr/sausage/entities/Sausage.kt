@@ -19,25 +19,18 @@ class Sausage(private val batch: SpriteBatch) {
         SCREAMING
     }
 
+    private var state = FINE
+
     private val fineTexture = Texture(Gdx.files.internal("sausage_fine_256_1-16.png"))
     private val fineAnimation = parseAnimation(fineTexture, width, height, 16)
 
-    private val screamingTexture = Texture(Gdx.files.internal("sausage_screaming_256_1-4_d.png"))
+    private val screamingTexture = Texture(Gdx.files.internal("sausage_screaming_256_1-4.png"))
     private val screamingAnimation = parseAnimation(screamingTexture, width, height, 4)
 
     private val fineToScreamingTexture = Texture(Gdx.files.internal("sausage_fine-to-screaming_256_1-4.png"))
     private val fineToScreamingAnimation = parseAnimation(fineToScreamingTexture, width, height, 4)
 
-    private var state = FINE
-    private val animation: Animation<TextureRegion> get() {
-        return when (state) {
-            FINE -> fineAnimation
-            FINE_TO_SCREAMING -> fineToScreamingAnimation
-            SCREAMING -> screamingAnimation
-        }
-    }
-
-    var screamTimer = 0f
+    private var screamTimer = 0f
     private val fineToScreamingDuration = 0.4f
     fun scream(delta: Float) {
         if (screamTimer >= fineToScreamingDuration) {
@@ -53,21 +46,22 @@ class Sausage(private val batch: SpriteBatch) {
         state = FINE
     }
 
-    var position = Vector2(-width/2f, -height/2f)
-
     private fun getFrame(time: Float): TextureRegion {
         return when (state) {
-            FINE -> animation.getKeyFrame(time, true)
-            FINE_TO_SCREAMING -> animation.getKeyFrame(screamTimer, false)
-            SCREAMING -> animation.getKeyFrame(time, true)
+            FINE -> fineAnimation.getKeyFrame(time, true)
+            FINE_TO_SCREAMING -> fineToScreamingAnimation.getKeyFrame(screamTimer, false)
+            SCREAMING -> screamingAnimation.getKeyFrame(time, true)
         }
     }
 
-    private val offset = 23f
+    private val offset = 20f
+    private val position = Vector2(-width/2f+offset, -height/2f+offset)
 
     fun draw(time: Float) {
         val frame = getFrame(time)
-        batch.draw(frame, position.x+offset, position.y+offset)
+        batch.begin()
+        batch.draw(frame, position.x, position.y)
+        batch.end()
     }
 
 }

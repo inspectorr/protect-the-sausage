@@ -10,6 +10,9 @@ class Screen {
         val BOTTOM = -Gdx.graphics.height/2f
         val LEFT = -Gdx.graphics.width/2f
         val CENTER = Vector2(0f, 0f)
+
+        val HEIGHT = Gdx.graphics.height.toFloat()
+        val WIDTH = Gdx.graphics.width.toFloat()
     }
 }
 

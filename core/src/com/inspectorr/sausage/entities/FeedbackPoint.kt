@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.GL20
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.math.Vector2
+import com.inspectorr.sausage.utils.rgba
 import java.util.*
 import kotlin.math.pow
 
@@ -27,8 +28,9 @@ class FeedbackPoint(private val point: Vector2, private val shapeRenderer: Shape
         var radius = (initRadius+(endRadius- initRadius)*(1-progress)).toInt()
         if (radius <= 1) radius = 1
 
-        Gdx.gl.glEnable(GL20.GL_BLEND)
-        shapeRenderer.color = Color(255f, 255f, 255f, progress)
+        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled)
+//        shapeRenderer.
+        shapeRenderer.color = rgba(255f, 255f, 255f, progress)
 
         val pointsCount = (initPointsCount*progress).toInt()
 
@@ -42,5 +44,6 @@ class FeedbackPoint(private val point: Vector2, private val shapeRenderer: Shape
                 shapeRenderer.rect(x, y, pointSize, pointSize)
             }
         }
+        shapeRenderer.end()
     }
 }
