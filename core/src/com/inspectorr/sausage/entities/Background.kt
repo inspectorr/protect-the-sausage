@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.glutils.ShaderProgram
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.inspectorr.sausage.utils.Screen
 import com.inspectorr.sausage.utils.glEnableAlpha
+import com.inspectorr.sausage.utils.randomFloat
 import com.inspectorr.sausage.utils.rgba
 
 val START_BG_COLOR = rgba(80f, 170f, 240f)
@@ -43,11 +44,26 @@ class Background(camera: OrthographicCamera) {
 
     private fun drawBackground() {
         shapeRenderer.color = backgroundColor
-//        shapeRenderer.point(100f, 100f, 0f)
         shapeRenderer.rect(
                 Screen.LEFT, Screen.BOTTOM,
                 Screen.WIDTH, Screen.HEIGHT
         )
+    }
+
+    private fun shadering() {
+        shader.apply {
+            begin()
+            val offset = randomFloat(20f) - 10f
+//            setUniformf(
+//                    "u_distort",
+//                    offset, offset, 0f
+//            )
+            setUniformf(
+                    "u_resolution",
+                    Screen.WIDTH, Screen.HEIGHT
+            )
+            end()
+        }
     }
 
     fun update(pawProgress: Float) {
@@ -55,6 +71,7 @@ class Background(camera: OrthographicCamera) {
     }
 
     fun draw() {
+        shadering()
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled)
         glEnableAlpha()
 
