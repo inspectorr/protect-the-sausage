@@ -1,11 +1,9 @@
 package com.inspectorr.sausage.entities
 
-import com.badlogic.gdx.Gdx
-import com.badlogic.gdx.graphics.Color
-import com.badlogic.gdx.graphics.GL20
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.math.Vector2
+import com.inspectorr.sausage.utils.glEnableAlpha
 import com.inspectorr.sausage.utils.rgba
 import java.util.*
 import kotlin.math.pow
@@ -29,7 +27,7 @@ class FeedbackPoint(private val point: Vector2, private val shapeRenderer: Shape
         if (radius <= 1) radius = 1
 
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled)
-//        shapeRenderer.
+        glEnableAlpha()
         shapeRenderer.color = rgba(255f, 255f, 255f, progress)
 
         val pointsCount = (initPointsCount*progress).toInt()

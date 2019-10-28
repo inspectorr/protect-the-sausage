@@ -1,45 +1,54 @@
 package com.inspectorr.sausage.entities
 
-import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.Color
-import com.badlogic.gdx.graphics.GL20
+import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
-import com.badlogic.gdx.math.Interpolation
 import com.inspectorr.sausage.utils.Screen
+import com.inspectorr.sausage.utils.glEnableAlpha
 import com.inspectorr.sausage.utils.rgba
-import java.lang.Math.cos
-import java.lang.Math.sin
-import kotlin.math.ln
 
-val START_BG_COLOR = rgba(145f, 200f, 255f)
-val END_BG_COLOR = rgba(105f, 9f, 0f)
+val START_BG_COLOR = rgba(80f, 170f, 240f)
+val END_BG_COLOR = rgba(80f, 70f, 140f)
 
 val deltaRed = END_BG_COLOR.r - START_BG_COLOR.r
 val deltaGreen = END_BG_COLOR.g - START_BG_COLOR.g
 val deltaBlue = END_BG_COLOR.b - START_BG_COLOR.b
 
+class Background(camera: OrthographicCamera) {
+    private val shapeRenderer = ShapeRenderer()
 
-class Background (private val shapeRenderer: ShapeRenderer) {
-    private var color = START_BG_COLOR
-    private val maxProgress = 3
-
-    fun update(pawProgress: Float) {
-        val progress = Interpolation.pow2In.apply(pawProgress)
-        val red = START_BG_COLOR.r + progress * deltaRed
-        val green = START_BG_COLOR.g + progress * deltaGreen
-        val blue = START_BG_COLOR.b + progress * deltaBlue
-        println("$progress;    $red     $blue     $green")
-        color = Color(red.toFloat(), green.toFloat(), blue.toFloat(), 1f)
+    init {
+        shapeRenderer.projectionMatrix = camera.combined
     }
 
-    fun draw() {
-        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled)
-        Gdx.gl.glEnable(GL20.GL_BLEND)
-        shapeRenderer.color = color
+    private var backgroundColor = START_BG_COLOR
+
+    private fun updateBackgroundColor(pawProgress: Float) {
+        val red = START_BG_COLOR.r + pawProgress * deltaRed
+        val green = START_BG_COLOR.g + pawProgress * deltaGreen
+        val blue = START_BG_COLOR.b + pawProgress * deltaBlue
+//        println("$pawProgress;    $red     $blue     $green")
+        backgroundColor = Color(red, green, blue, 1f)
+    }
+
+    private fun drawBackground() {
+        shapeRenderer.color = backgroundColor
         shapeRenderer.rect(
                 Screen.LEFT, Screen.BOTTOM,
                 Screen.WIDTH, Screen.HEIGHT
         )
+    }
+
+    fun update(pawProgress: Float) {
+        updateBackgroundColor(pawProgress)
+    }
+
+    fun draw() {
+        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled)
+        glEnableAlpha()
+
+        drawBackground()
+
         shapeRenderer.end()
     }
 }

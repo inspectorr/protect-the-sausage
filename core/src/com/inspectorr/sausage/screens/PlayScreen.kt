@@ -40,7 +40,7 @@ class PlayScreen : ScreenAdapter() {
 
     private fun initEntities() {
         sausage = Sausage(batch)
-        background = Background(shapeRenderer)
+        background = Background(camera)
         addPaw()
     }
 
@@ -135,11 +135,9 @@ class PlayScreen : ScreenAdapter() {
     private fun clear() {
         Gdx.gl.glClearColor(0f, 0f, 0f, 1f)
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT)
-        Gdx.gl.glEnable(GL20.GL_BLEND)
-        Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA)
     }
 
-    fun draw() {
+    private fun draw() {
         background.draw()
         sausage.draw(time)
         drawPaws()
@@ -148,7 +146,6 @@ class PlayScreen : ScreenAdapter() {
 
     override fun render(delta: Float) {
         update(delta)
-//        println(pawsProgress)
         clear()
         draw()
     }
