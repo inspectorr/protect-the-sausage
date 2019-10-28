@@ -11,7 +11,6 @@ object DesktopLauncher {
             height = 1024
             width = 576
             resizable = false
-            useGL30 = true
         }
         LwjglApplication(Game(), config)
     }

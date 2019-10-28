@@ -1,7 +1,9 @@
 package com.inspectorr.sausage.entities
 
+import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.OrthographicCamera
+import com.badlogic.gdx.graphics.glutils.ShaderProgram
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.inspectorr.sausage.utils.Screen
 import com.inspectorr.sausage.utils.glEnableAlpha
@@ -15,10 +17,18 @@ val deltaGreen = END_BG_COLOR.g - START_BG_COLOR.g
 val deltaBlue = END_BG_COLOR.b - START_BG_COLOR.b
 
 class Background(camera: OrthographicCamera) {
-    private val shapeRenderer = ShapeRenderer()
+    private val shader: ShaderProgram = ShaderProgram(Gdx.files.internal("shaders/bg.vsh"), Gdx.files.internal("shaders/bg.fsh"))
+    private val shapeRenderer = ShapeRenderer(5000, shader)
+
 
     init {
         shapeRenderer.projectionMatrix = camera.combined
+        println("shader ${shader.isCompiled}")
+        println(shader.log)
+    }
+
+    fun show() {
+//        shader.setUniformMatrix("u_projTrans", camera.combined);
     }
 
     private var backgroundColor = START_BG_COLOR
@@ -33,6 +43,7 @@ class Background(camera: OrthographicCamera) {
 
     private fun drawBackground() {
         shapeRenderer.color = backgroundColor
+//        shapeRenderer.point(100f, 100f, 0f)
         shapeRenderer.rect(
                 Screen.LEFT, Screen.BOTTOM,
                 Screen.WIDTH, Screen.HEIGHT

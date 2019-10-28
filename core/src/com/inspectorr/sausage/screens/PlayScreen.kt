@@ -41,6 +41,7 @@ class PlayScreen : ScreenAdapter() {
     private fun initEntities() {
         sausage = Sausage(batch)
         background = Background(camera)
+        background.show()
         addPaw()
     }
 
