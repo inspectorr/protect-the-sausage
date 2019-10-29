@@ -6,10 +6,9 @@ import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.graphics.glutils.ShaderProgram
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.inspectorr.sausage.utils.Screen
+import com.inspectorr.sausage.utils.asset
 import com.inspectorr.sausage.utils.glEnableAlpha
-import com.inspectorr.sausage.utils.randomFloat
 import com.inspectorr.sausage.utils.rgba
-import java.lang.Math.sin
 import kotlin.math.sin
 
 val START_BG_COLOR = rgba(80f, 160f, 250f)
@@ -20,18 +19,33 @@ val deltaGreen = END_BG_COLOR.g - START_BG_COLOR.g
 val deltaBlue = END_BG_COLOR.b - START_BG_COLOR.b
 
 class Background(camera: OrthographicCamera) {
-    private val shader: ShaderProgram = ShaderProgram(Gdx.files.internal("shaders/bg.vsh"), Gdx.files.internal("shaders/bg.fsh"))
-    private val shapeRenderer = ShapeRenderer(5000, shader)
+    private val roundShader = ShaderProgram(
+            asset("shaders/background/round.vsh"),
+            asset("shaders/background/round.fsh")
+    )
+    private val roundRenderer = ShapeRenderer(5000, roundShader)
+
+    private val backgroundColorShader = ShaderProgram(
+            asset("shaders/background/cloud.vsh"),
+            asset("shaders/background/cloud.fsh")
+    )
+    private val backgroundColorRenderer = ShapeRenderer(5000, backgroundColorShader)
+//    private val backgroundColorRenderer = ShapeRenderer()
+
+
 
 
     init {
-        shapeRenderer.projectionMatrix = camera.combined
-        println("shader ${shader.isCompiled}")
-        println(shader.log)
+        roundRenderer.projectionMatrix = camera.combined
+        backgroundColorRenderer.projectionMatrix = camera.combined
+        println("roundShader ${roundShader.isCompiled}")
+        println(roundShader.log)
+        println("backgroundColorShader ${backgroundColorShader.isCompiled}")
+        println(backgroundColorShader.log)
     }
 
     fun show() {
-//        shader.setUniformMatrix("u_projTrans", camera.combined);
+//        roundShader.setUniformMatrix("u_projTrans", camera.combined);
     }
 
     private var backgroundColor = START_BG_COLOR
@@ -45,25 +59,42 @@ class Background(camera: OrthographicCamera) {
     }
 
     private fun drawBackground() {
-        shapeRenderer.color = backgroundColor
-        shapeRenderer.rect(
-                Screen.LEFT, Screen.BOTTOM,
-                Screen.WIDTH, Screen.HEIGHT
-        )
+        backgroundColorRenderer.apply {
+            begin(ShapeRenderer.ShapeType.Filled)
+            glEnableAlpha()
+            color = backgroundColor
+            rect(
+                    Screen.LEFT, Screen.BOTTOM,
+                    Screen.WIDTH, Screen.HEIGHT
+            )
+            end()
+        }
     }
 
-    private fun shadering(progress: Float) {
-        println("$progress\n")
-        shader.apply {
+    private fun setBackgroundColorShader(time: Float) {
+        println("$time\n")
+        backgroundColorShader.apply {
+            begin()
+            setUniformf(
+                    "u_resolution",
+                    Screen.WIDTH, Screen.HEIGHT
+            )
+            setUniformf(
+                    "u_time",
+                    time
+            )
+            end()
+        }
+    }
+
+    private fun setRoundShader(progress: Float) {
+        roundShader.apply {
             begin()
             setUniformf(
                     "u_progress",
                     sin(progress)
 //                        progress
             )
-//            setUniformf(
-//                    "u_colorOffset",
-//            )
             setUniformf(
                     "u_resolution",
                     Screen.WIDTH, Screen.HEIGHT
@@ -72,17 +103,31 @@ class Background(camera: OrthographicCamera) {
         }
     }
 
-    fun update(pawProgress: Float) {
-        shadering(pawProgress)
+    private fun updateRoundColor(progress: Float) {
+        roundRenderer.color = rgba(155f, 0f, 0f, progress)
+    }
+
+    private fun drawRound() {
+        roundRenderer.apply {
+            begin(ShapeRenderer.ShapeType.Filled)
+            glEnableAlpha()
+            rect(
+                    Screen.LEFT, Screen.BOTTOM,
+                    Screen.WIDTH, Screen.HEIGHT
+            )
+            end()
+        }
+    }
+
+    fun update(pawProgress: Float, time: Float) {
+        setRoundShader(pawProgress)
+        setBackgroundColorShader(time)
         updateBackgroundColor(pawProgress)
+        updateRoundColor(pawProgress)
     }
 
     fun draw() {
-        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled)
-        glEnableAlpha()
-
         drawBackground()
-
-        shapeRenderer.end()
+        drawRound()
     }
 }

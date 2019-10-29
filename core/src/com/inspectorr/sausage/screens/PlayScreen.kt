@@ -46,6 +46,7 @@ class PlayScreen : ScreenAdapter() {
     }
 
     private fun addPaw() {
+        return
         val key = randomString()
         paws[key] = Paw(batch, key, shapeRenderer)
     }
@@ -76,7 +77,7 @@ class PlayScreen : ScreenAdapter() {
             pawsProgress += it.progress
         }
 
-        background.update(pawsProgress)
+        background.update(pawsProgress, time)
 
         sausage.apply {
             if (paws.values.isNotEmpty()) {

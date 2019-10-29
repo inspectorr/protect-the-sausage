@@ -2,12 +2,11 @@ package com.inspectorr.sausage.entities
 
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.Texture
-import com.badlogic.gdx.graphics.g2d.Animation
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.math.Vector2
 import com.inspectorr.sausage.entities.Sausage.State.*
-import com.inspectorr.sausage.utils.parseAnimation
+import com.inspectorr.sausage.utils.animation
 
 class Sausage(private val batch: SpriteBatch) {
     private val width = 256
@@ -22,13 +21,13 @@ class Sausage(private val batch: SpriteBatch) {
     private var state = FINE
 
     private val fineTexture = Texture(Gdx.files.internal("sausage_fine_256_1-16.png"))
-    private val fineAnimation = parseAnimation(fineTexture, width, height, 16)
+    private val fineAnimation = animation(fineTexture, width, height, 16)
 
     private val screamingTexture = Texture(Gdx.files.internal("sausage_screaming_256_1-4.png"))
-    private val screamingAnimation = parseAnimation(screamingTexture, width, height, 4)
+    private val screamingAnimation = animation(screamingTexture, width, height, 4)
 
     private val fineToScreamingTexture = Texture(Gdx.files.internal("sausage_fine-to-screaming_256_1-4.png"))
-    private val fineToScreamingAnimation = parseAnimation(fineToScreamingTexture, width, height, 4)
+    private val fineToScreamingAnimation = animation(fineToScreamingTexture, width, height, 4)
 
     private var screamTimer = 0f
     private val fineToScreamingDuration = 0.4f
