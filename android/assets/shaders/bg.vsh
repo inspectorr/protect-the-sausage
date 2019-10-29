@@ -5,6 +5,7 @@ attribute vec2 a_texCoord;
 
 //our camera matrix
 uniform mat4 u_projModelView;
+//uniform float u_progress;
 //uniform vec3 u_distort;
 
 //send out to the fragment shader

@@ -9,8 +9,10 @@ import com.inspectorr.sausage.utils.Screen
 import com.inspectorr.sausage.utils.glEnableAlpha
 import com.inspectorr.sausage.utils.randomFloat
 import com.inspectorr.sausage.utils.rgba
+import java.lang.Math.sin
+import kotlin.math.sin
 
-val START_BG_COLOR = rgba(80f, 170f, 240f)
+val START_BG_COLOR = rgba(80f, 160f, 250f)
 val END_BG_COLOR = rgba(80f, 70f, 140f)
 
 val deltaRed = END_BG_COLOR.r - START_BG_COLOR.r
@@ -50,13 +52,17 @@ class Background(camera: OrthographicCamera) {
         )
     }
 
-    private fun shadering() {
+    private fun shadering(progress: Float) {
+        println("$progress\n")
         shader.apply {
             begin()
-            val offset = randomFloat(20f) - 10f
+            setUniformf(
+                    "u_progress",
+                    sin(progress)
+//                        progress
+            )
 //            setUniformf(
-//                    "u_distort",
-//                    offset, offset, 0f
+//                    "u_colorOffset",
 //            )
             setUniformf(
                     "u_resolution",
@@ -67,11 +73,11 @@ class Background(camera: OrthographicCamera) {
     }
 
     fun update(pawProgress: Float) {
+        shadering(pawProgress)
         updateBackgroundColor(pawProgress)
     }
 
     fun draw() {
-        shadering()
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled)
         glEnableAlpha()
 
