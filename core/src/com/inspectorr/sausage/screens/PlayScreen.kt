@@ -8,10 +8,10 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.math.Vector2
 import com.inspectorr.sausage.ui.Background
-import com.inspectorr.sausage.ui.FeedbackPoint
 import com.inspectorr.sausage.entities.Paw
 import com.inspectorr.sausage.entities.Sausage
 import com.inspectorr.sausage.ui.Score
+import com.inspectorr.sausage.ui.SwipePath
 import com.inspectorr.sausage.utils.Screen
 import com.inspectorr.sausage.utils.randomString
 
@@ -48,7 +48,6 @@ class PlayScreen : ScreenAdapter() {
     }
 
     private fun addPaw() {
-//        return
         val key = randomString()
         paws[key] = Paw(batch, key, shapeRenderer)
     }
@@ -90,48 +89,17 @@ class PlayScreen : ScreenAdapter() {
             }
         }
 
-        updateTouches(delta)
+        path.update(delta)
 
         camera.update()
     }
 
-    fun handleTouch(screenX: Int, screenY: Int) {
+    private val path = SwipePath(camera)
+
+    fun handlePan(screenX: Float, screenY: Float) {
         val x = screenX - Gdx.graphics.width/2f
         val y = -screenY + Gdx.graphics.height/2f
-        println("x: $x, y: $y")
-        paws.values.forEach {
-            if (it.shape.contains(x, y)) {
-                score.increment()
-                it.onTouch()
-            }
-        }
-        addFeedbackPoint(x, y)
-    }
-
-    private val feedbackPoints = mutableMapOf<String, FeedbackPoint>()
-
-    private fun addFeedbackPoint(x: Float, y: Float) {
-        val key = randomString()
-        feedbackPoints[key] = FeedbackPoint(Vector2(x, y), shapeRenderer, key)
-    }
-
-    private fun updateTouches(delta: Float) {
-        var removeKey = ""
-        var shouldRemove = false
-        feedbackPoints.values.forEach {
-            it.timeLeft -= delta
-            if (it.timeLeft <= 0f) {
-                removeKey = it.key
-                shouldRemove = true
-            }
-        }
-        if (shouldRemove) feedbackPoints.remove(removeKey)
-    }
-
-    private fun drawTouchFeedback() {
-        feedbackPoints.values.forEach {
-            it.draw()
-        }
+        path.add(Vector2(x, y))
     }
 
     private fun drawPaws() {
@@ -148,7 +116,7 @@ class PlayScreen : ScreenAdapter() {
         sausage.draw(time)
         drawPaws()
         score.draw()
-        drawTouchFeedback()
+        path.draw()
     }
 
     override fun render(delta: Float) {

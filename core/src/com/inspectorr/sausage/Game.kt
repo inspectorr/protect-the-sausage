@@ -3,6 +3,8 @@ package com.inspectorr.sausage
 import com.badlogic.gdx.ApplicationAdapter
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.InputAdapter
+import com.badlogic.gdx.input.GestureDetector
+import com.badlogic.gdx.math.Vector2
 import com.inspectorr.sausage.screens.PlayScreen
 
 class Game : ApplicationAdapter() {
@@ -18,19 +20,50 @@ class Game : ApplicationAdapter() {
         playScreen = PlayScreen()
         playScreen.show()
 
-        Gdx.input.inputProcessor = object : InputAdapter() {
-            override fun touchDown(x: Int, y: Int, pointer: Int, button: Int): Boolean {
-                // your touch down code here
-                playScreen.handleTouch(x, y)
+        Gdx.input.inputProcessor = GestureDetector(object : GestureDetector.GestureListener {
+            override fun touchDown(x: Float, y: Float, pointer: Int, button: Int): Boolean {
 
-                return true // return true to indicate the event was handled
+                return false
             }
 
-            override fun touchUp(x: Int, y: Int, pointer: Int, button: Int): Boolean {
-                // your touch up code here
-                return true // return true to indicate the event was handled
+            override fun tap(x: Float, y: Float, count: Int, button: Int): Boolean {
+
+                return false
             }
-        }
+
+            override fun longPress(x: Float, y: Float): Boolean {
+
+                return false
+            }
+
+            override fun fling(velocityX: Float, velocityY: Float, button: Int): Boolean {
+
+                return false
+            }
+
+            override fun pan(x: Float, y: Float, deltaX: Float, deltaY: Float): Boolean {
+                println("pan $x, $y, $deltaX, $deltaY")
+                playScreen.handlePan(x, y)
+                return false
+            }
+
+            override fun panStop(x: Float, y: Float, pointer: Int, button: Int): Boolean {
+
+                return false
+            }
+
+            override fun zoom(originalDistance: Float, currentDistance: Float): Boolean {
+                return false
+            }
+
+            override fun pinch(initialFirstPointer: Vector2, initialSecondPointer: Vector2, firstPointer: Vector2, secondPointer: Vector2): Boolean {
+
+                return false
+            }
+
+            override fun pinchStop() {}
+        })
+
     }
 
     override fun render() {
