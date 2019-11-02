@@ -7,10 +7,11 @@ import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.math.Vector2
-import com.inspectorr.sausage.entities.Background
-import com.inspectorr.sausage.entities.FeedbackPoint
+import com.inspectorr.sausage.ui.Background
+import com.inspectorr.sausage.ui.FeedbackPoint
 import com.inspectorr.sausage.entities.Paw
 import com.inspectorr.sausage.entities.Sausage
+import com.inspectorr.sausage.ui.Score
 import com.inspectorr.sausage.utils.Screen
 import com.inspectorr.sausage.utils.randomString
 
@@ -21,6 +22,7 @@ class PlayScreen : ScreenAdapter() {
 
     private lateinit var background: Background
     private lateinit var sausage: Sausage
+    private lateinit var score: Score
 
     private val paws = mutableMapOf<String, Paw>()
 
@@ -41,12 +43,12 @@ class PlayScreen : ScreenAdapter() {
     private fun initEntities() {
         sausage = Sausage(batch)
         background = Background(camera)
-        background.show()
+        score = Score(camera)
         addPaw()
     }
 
     private fun addPaw() {
-        return
+//        return
         val key = randomString()
         paws[key] = Paw(batch, key, shapeRenderer)
     }
@@ -79,6 +81,7 @@ class PlayScreen : ScreenAdapter() {
 
         background.update(pawsProgress, time)
 
+        // todo refactor
         sausage.apply {
             if (paws.values.isNotEmpty()) {
                 scream(delta)
@@ -98,6 +101,7 @@ class PlayScreen : ScreenAdapter() {
         println("x: $x, y: $y")
         paws.values.forEach {
             if (it.shape.contains(x, y)) {
+                score.increment()
                 it.onTouch()
             }
         }
@@ -143,6 +147,7 @@ class PlayScreen : ScreenAdapter() {
         background.draw()
         sausage.draw(time)
         drawPaws()
+        score.draw()
         drawTouchFeedback()
     }
 

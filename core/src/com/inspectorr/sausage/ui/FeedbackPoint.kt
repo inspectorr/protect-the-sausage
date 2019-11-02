@@ -1,4 +1,4 @@
-package com.inspectorr.sausage.entities
+package com.inspectorr.sausage.ui
 
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.math.Interpolation
@@ -23,14 +23,14 @@ class FeedbackPoint(private val point: Vector2, private val shapeRenderer: Shape
     fun draw () {
         val progress = Interpolation.pow2In.apply(timeLeft / feedbackLength)
 
-        var radius = (initRadius+(endRadius- initRadius)*(1-progress)).toInt()
+        var radius = (initRadius +(endRadius - initRadius)*(1-progress)).toInt()
         if (radius <= 1) radius = 1
 
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled)
         glEnableAlpha()
         shapeRenderer.color = rgba(255f, 255f, 255f, progress)
 
-        val pointsCount = (initPointsCount*progress).toInt()
+        val pointsCount = (initPointsCount *progress).toInt()
 
         for (i in 0..pointsCount) {
             val pointSize = random.nextInt(maxPointSize).toFloat()*progress

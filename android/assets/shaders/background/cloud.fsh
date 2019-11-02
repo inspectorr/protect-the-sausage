@@ -5,6 +5,9 @@ precision mediump float;
 uniform vec2 u_resolution;
 uniform vec2 u_mouse;
 uniform float u_time;
+uniform float u_progress;
+
+varying vec4 v_color;
 
 // 2D Random
 float random (in vec2 st) {
@@ -15,17 +18,24 @@ float random (in vec2 st) {
 
 // 2D Noise based on Morgan McGuire @morgan3d
 // https://www.shadertoy.com/view/4dS3Wd
-const float speed = 0.1;
+const float speed = 0.02;
 
 float noise (in vec2 st) {
     vec2 i = floor(st);
     vec2 f = fract(st);
 
+    float offset = cos(u_progress) * sin(u_progress);
+//    if (mod(floor(u_time), 2.0) == 0.0) {
+//        offset = cos(u_time*speed);
+//    } else {
+//        offset = sin(u_time*speed);
+//    }
+
     // Four corners in 2D of a tile
-    float a = random(i) + sin(u_time*speed);
-    float b = random(i + vec2(1.0, 0.0)) - cos(u_time*speed);
-    float c = random(i + vec2(0.0, 1.0)) + cos(u_time*speed);
-    float d = random(i + vec2(1.0, 1.0)) - sin(u_time*speed);
+    float a = random(i) + offset;
+    float b = random(i + vec2(1.0, 0.0)) + offset;
+    float c = random(i + vec2(0.0, 1.0)) + offset;
+    float d = random(i + vec2(1.0, 1.0)) + offset;
 
     // Smooth Interpolation
 
@@ -41,14 +51,14 @@ float noise (in vec2 st) {
 
 void main() {
     float time = u_time;
-    vec2 st = gl_FragCoord.xy/u_resolution.xy;
+    vec2 st = gl_FragCoord.xy/u_resolution.xy + time*speed;
 
     // Scale the coordinate system to see
     // some noise in action
-    vec2 pos = vec2(st*1.0);
+    vec2 pos = vec2(st*10.0);
 
     // Use the noise function
     float n = noise(pos);
 
-    gl_FragColor = vec4(vec3(n), 1.0);
+    gl_FragColor = vec4(v_color.rgb, 1.0-n);
 }

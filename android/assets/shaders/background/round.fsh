@@ -25,7 +25,6 @@ void main() {
     float vig = smoothstep(outerRadius, innerRadius, len);
 
 //    color.rgb = mix(color.rgb, color.rgb * vig, intensity);
-
 //    gl_FragColor = color;
     gl_FragColor = vec4(color.rgb*vig, 1.0-vig);
 }
