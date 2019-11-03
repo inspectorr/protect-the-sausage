@@ -55,6 +55,7 @@ class Paw(private val batch: SpriteBatch, val key: String, private val debugShap
 
     enum class State {
         MOVING_CENTER,
+        MOVING_CUTTED,
         MOVING_BACK,
         PAUSE
     }
@@ -65,6 +66,7 @@ class Paw(private val batch: SpriteBatch, val key: String, private val debugShap
         when (state) {
             State.MOVING_CENTER -> moveCenter()
             State.MOVING_BACK -> moveBack()
+            State.MOVING_CUTTED -> movingCut()
             State.PAUSE -> pause()
         }
     }
@@ -134,10 +136,22 @@ class Paw(private val batch: SpriteBatch, val key: String, private val debugShap
             if (isIntersected) count + 1 else count
         }
 
-//        intersectionPoints.forEach { println(it) }
-//        println("\n")
+        return if (intersectedLinesCount >= 2) {
+            // cut paw
+            cutPaw(intersectionPoints)
+            true
+        } else {
+            false
+        }
+    }
 
-        return intersectedLinesCount >= 2
+    private fun cutPaw(intersectionPoints: List<Vector2>) {
+        intersectionPoints.forEach { println(it) }
+        println("\n")
+    }
+
+    private fun movingCut() {
+
     }
 
     private fun updateShape() {
@@ -162,16 +176,18 @@ class Paw(private val batch: SpriteBatch, val key: String, private val debugShap
     }
 
     fun draw(camera: OrthographicCamera) {
-        batch.begin()
-        batch.draw(
-             texture,
-             shape.x, shape.y,
-             shape.originX, shape.originY,
-             textureWidth, textureHeight,
-             shape.scaleX, shape.scaleY,
-             shape.rotation
-        )
-        batch.end()
+        batch.apply {
+            begin()
+            draw(
+                    texture,
+                    shape.x, shape.y,
+                    shape.originX, shape.originY,
+                    textureWidth, textureHeight,
+                    shape.scaleX, shape.scaleY,
+                    shape.rotation
+            )
+            end()
+        }
     }
 
     fun debugDrawObjectBorder() {
