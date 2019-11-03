@@ -8,10 +8,7 @@ import kotlin.math.atan2
 import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.math.*
-import com.inspectorr.sausage.utils.Screen
-import com.inspectorr.sausage.utils.distance
-import com.inspectorr.sausage.utils.isOutOfScreen
-import com.inspectorr.sausage.utils.randomInt
+import com.inspectorr.sausage.utils.*
 import kotlin.math.round
 
 class Paw(private val batch: SpriteBatch, val key: String, private val debugShapeRenderer: ShapeRenderer) {
@@ -31,7 +28,7 @@ class Paw(private val batch: SpriteBatch, val key: String, private val debugShap
     private fun randomPosBottom() = Vector2(randomX(), Screen.BOTTOM)
     private fun randomPosLeft() = Vector2(Screen.LEFT, randomY())
 
-    val shape = Polygon()
+    private val shape = Polygon()
 
     init {
         when (randomInt(4)) {
@@ -115,6 +112,32 @@ class Paw(private val batch: SpriteBatch, val key: String, private val debugShap
     fun onTouch() {
         println("paw touch")
         state = State.MOVING_BACK
+    }
+
+    // todo know about any hardcore algos
+    fun isIntersectsByLine(start: Vector2, end: Vector2) : Boolean {
+        val polyline = floatToVector2(shape.transformedVertices)
+
+        val intersectionPoints = List(4) { Vector2() }
+
+        val isIntersectsLines = List(4) { index ->
+            Intersector.intersectSegments(
+                    start, end,
+                    polyline[index],
+                    polyline[if (index == 3) 0 else index+1],
+                    intersectionPoints[index]
+            )
+        }
+
+        val intersectedLinesCount = isIntersectsLines.fold(0) {
+            count, isIntersected->
+            if (isIntersected) count + 1 else count
+        }
+
+//        intersectionPoints.forEach { println(it) }
+//        println("\n")
+
+        return intersectedLinesCount >= 2
     }
 
     private fun updateShape() {

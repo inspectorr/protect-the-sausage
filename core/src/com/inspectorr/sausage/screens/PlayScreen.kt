@@ -68,12 +68,22 @@ class PlayScreen : ScreenAdapter() {
             pawTimer = 0f
         }
 
+        // todo extract to Paws class
         paws.values.forEach {
             if (it.complete) {
                 it.onRemove()
                 paws.remove(it.key)
                 return
             }
+
+            if (path.original.size >= 2 &&
+                    it.isIntersectsByLine(
+                            path.original.first().p,
+                            path.original.last().p
+                    )) {
+                it.onTouch()
+            }
+
             it.update(delta)
             pawsProgress += it.progress
         }

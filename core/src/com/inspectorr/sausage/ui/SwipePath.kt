@@ -7,7 +7,7 @@ import com.badlogic.gdx.math.Vector2
 
 class SwipePath(camera: OrthographicCamera) {
     private val renderer = ShapeRenderer()
-    private var original = mutableListOf<Point>()
+    var original = mutableListOf<Point>()
     private var drawing = mutableListOf<Vector2>()
 
     init {
@@ -21,7 +21,6 @@ class SwipePath(camera: OrthographicCamera) {
     }
 
     fun update(delta: Float) {
-        if (original.size > 0) println(original[0].timer)
         original.forEach { it.timer -= delta }
         original.removeAll { it.timer <= 0f }
         drawing = resolve(original.map { it.p }.toMutableList())
