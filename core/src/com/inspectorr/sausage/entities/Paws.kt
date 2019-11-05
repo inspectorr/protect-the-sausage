@@ -8,18 +8,18 @@ import com.inspectorr.sausage.utils.randomString
 
 class Paws(private val camera: OrthographicCamera) {
     private val batch = SpriteBatch()
-    private val shapeRenderer = ShapeRenderer()
+    private val maskRenderer = ShapeRenderer()
 
     val entities = mutableMapOf<String, Paw>()
 
     private fun add() {
         val key = randomString()
-        entities[key] = Paw(batch, key, shapeRenderer)
+        entities[key] = Paw(batch, key, maskRenderer)
     }
 
     init {
         batch.projectionMatrix = camera.combined
-        shapeRenderer.projectionMatrix = camera.combined
+        maskRenderer.projectionMatrix = camera.combined
         add()
     }
 
@@ -38,7 +38,6 @@ class Paws(private val camera: OrthographicCamera) {
             pawTimer = 0f
         }
 
-        // todo extract to Paws class
         entities.values.forEach {
             if (it.complete) {
                 it.onRemove()

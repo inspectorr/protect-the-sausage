@@ -17,28 +17,17 @@ import com.inspectorr.sausage.utils.randomString
 class PlayScreen : ScreenAdapter() {
     private val camera = OrthographicCamera(Screen.WIDTH, Screen.HEIGHT)
 
-    private lateinit var background: Background
-    private lateinit var sausage: Sausage
-    private lateinit var score: Score
-    private lateinit var paws: Paws
+    private val background = Background(camera)
+    private val sausage = Sausage(camera)
+    private val score = Score(camera)
+    private val paws = Paws(camera)
 
     private var time = 0f
-
-    override fun show() {
-        initEntities()
-    }
-
-    private fun initEntities() {
-        sausage = Sausage(camera)
-        background = Background(camera)
-        score = Score(camera)
-        paws = Paws(camera)
-    }
 
     private fun update(delta: Float) {
         time += delta
 
-        background.update(paws.progress, time)
+        background.update(0f, time)
 
         // todo refactor
         sausage.apply {
@@ -67,6 +56,12 @@ class PlayScreen : ScreenAdapter() {
     private fun clear() {
         Gdx.gl.glClearColor(0f, 0f, 0f, 1f)
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT)
+        //2. clear our depth buffer with 1.0
+//        Gdx.gl.glClearDepthf(1f)
+//        Gdx.gl.glClear(GL20.GL_DEPTH_BUFFER_BIT)
+
+//        //3. set the function to LESS
+//        Gdx.gl.glDepthFunc(GL20.GL_BLEND)
     }
 
     private fun draw() {

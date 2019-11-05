@@ -18,7 +18,6 @@ class Game : ApplicationAdapter() {
 //        ShaderProgram.prependVertexCode = "#version 140\n#define varying out\n#define attribute in\n";
 //        ShaderProgram.prependFragmentCode = "#version 140\n#define varying in\n#define texture2D texture\n#define gl_FragColor fragColor\nout vec4 fragColor;\n";
         playScreen = PlayScreen()
-        playScreen.show()
 
         Gdx.input.inputProcessor = GestureDetector(object : GestureDetector.GestureListener {
             override fun touchDown(x: Float, y: Float, pointer: Int, button: Int): Boolean {

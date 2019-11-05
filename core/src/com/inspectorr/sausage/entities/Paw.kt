@@ -1,6 +1,8 @@
 package com.inspectorr.sausage.entities
 
 import com.badlogic.gdx.Gdx
+import com.badlogic.gdx.graphics.Color
+import com.badlogic.gdx.graphics.GL20
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.graphics.g2d.TextureRegion
@@ -9,9 +11,10 @@ import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.math.*
 import com.inspectorr.sausage.utils.*
+import kotlin.math.PI
 import kotlin.math.round
 
-class Paw(private val batch: SpriteBatch, val key: String, private val debugShapeRenderer: ShapeRenderer) {
+class Paw(private val batch: SpriteBatch, val key: String, private val maskRenderer: ShapeRenderer) {
     private lateinit var position: Vector2
     private var delta: Vector2
     private var start: Vector2
@@ -49,13 +52,13 @@ class Paw(private val batch: SpriteBatch, val key: String, private val debugShap
                     textureWidth, textureHeight,
                     textureWidth, 0f
             )
-            setScale(2f, 2f)
+            setScale(1f, 1f)
         }
     }
 
     enum class State {
         MOVING_CENTER,
-        MOVING_CUTTED,
+        MOVING_CUT,
         MOVING_BACK,
         PAUSE
     }
@@ -66,7 +69,7 @@ class Paw(private val batch: SpriteBatch, val key: String, private val debugShap
         when (state) {
             State.MOVING_CENTER -> moveCenter()
             State.MOVING_BACK -> moveBack()
-            State.MOVING_CUTTED -> movingCut()
+            State.MOVING_CUT -> movingCut()
             State.PAUSE -> pause()
         }
     }
@@ -76,7 +79,8 @@ class Paw(private val batch: SpriteBatch, val key: String, private val debugShap
         position.add(delta.x*centerSpeed,delta.y*centerSpeed)
     }
 
-    private val backSpeed = 0.075f
+//    private val backSpeed = 0.075f
+    private val backSpeed = 0.01f
     private fun moveBack() {
         position.add(-delta.x*backSpeed,-delta.y*backSpeed)
     }
@@ -113,20 +117,23 @@ class Paw(private val batch: SpriteBatch, val key: String, private val debugShap
 
     fun onTouch() {
         println("paw touch")
-        state = State.MOVING_BACK
+//        state = State.MOVING_BACK
     }
 
-    // todo know about any hardcore algos
+    // todo know about any high performance hardcore algos
+    // todo at least do without vector
     fun isIntersectsByLine(start: Vector2, end: Vector2) : Boolean {
+        if (state == State.MOVING_CUT) return false
+
         val polyline = floatToVector2(shape.transformedVertices)
 
-        val intersectionPoints = List(4) { Vector2() }
+        val intersectionPoints = List(polyline.size) { Vector2() }
 
-        val isIntersectsLines = List(4) { index ->
+        val isIntersectsLines = List(polyline.size) { index ->
             Intersector.intersectSegments(
                     start, end,
                     polyline[index],
-                    polyline[if (index == 3) 0 else index+1],
+                    polyline[if (index == polyline.size-1) 0 else index+1],
                     intersectionPoints[index]
             )
         }
@@ -145,13 +152,56 @@ class Paw(private val batch: SpriteBatch, val key: String, private val debugShap
         }
     }
 
+    private val ear = EarClippingTriangulator()
+    private var trgIndexes = ear.computeTriangles(shape.vertices)
+
     private fun cutPaw(intersectionPoints: List<Vector2>) {
-        intersectionPoints.forEach { println(it) }
-        println("\n")
+        println("CUT PAW")
+        state = State.MOVING_CUT
+
+        val points = intersectionPoints.filter { it.x != 0f || it.y != 0f }
+        if (points.size != 2) {
+            println(points)
+            println("wtf is wrong with this world")
+            return
+        }
+
+        val start = points[0]
+        val end = points[1]
+
+        val vertices = floatToVector2(shape.transformedVertices)
+        val clockwise = mutableListOf(start, end)
+        val antiClockwise = mutableListOf(start, end)
+
+        vertices.forEach {
+            val determinant = determinant2x3(
+                    start.x, start.y, end.x, end.y, it.x, it.y
+            )
+            if (determinant >= 0) clockwise.add(it)
+            else antiClockwise.add(it)
+        }
+
+        val angle = shape.rotation * PI/180
+        val origin = Vector2(shape.originX, shape.originY)
+        val position = Vector2(shape.x, shape.y)
+
+        val vertices1 = clockwise.map {
+            val translated = Vector2(it.x - position.x, it.y - position.y)
+            val rotated = rotatePoint(translated, angle.toFloat(), origin)
+//            Vector2(rotated.x - position.x, rotated.y - position.y)
+//            it
+            rotated
+        }
+
+        println(vertices1)
+
+        shape.vertices = vector2ToFloat(vertices1)
+        trgIndexes = ear.computeTriangles(shape.vertices)
+//        shape.vertices = vector2ToFloat(clockwise)
     }
 
     private fun movingCut() {
-
+        moveBack()
     }
 
     private fun updateShape() {
@@ -168,7 +218,8 @@ class Paw(private val batch: SpriteBatch, val key: String, private val debugShap
         updateShape()
     }
 
-    val angle: Float get() = atan2(position.y, position.x)*(180/Math.PI).toFloat()
+    private val angle: Float get() = atan2(position.y, position.x)*(180/Math.PI).toFloat()
+
     val progress: Float get() {
         val posToDelta = position.x / delta.x
         val progress = if (posToDelta + 1 > 0f) posToDelta + 1 else 0f
@@ -176,8 +227,27 @@ class Paw(private val batch: SpriteBatch, val key: String, private val debugShap
     }
 
     fun draw(camera: OrthographicCamera) {
+        enableMasking()
+
+        maskRenderer.apply {
+            begin(ShapeRenderer.ShapeType.Filled)
+            val vertices = shape.transformedVertices
+            for (i in 0 until trgIndexes.size step 3) {
+                triangle(
+                        vertices[trgIndexes[i]*2],
+                        vertices[trgIndexes[i]*2+1],
+                        vertices[trgIndexes[i+1]*2],
+                        vertices[trgIndexes[i+1]*2+1],
+                        vertices[trgIndexes[i+2]*2],
+                        vertices[trgIndexes[i+2]*2+1]
+                )
+            }
+            end()
+        }
+
         batch.apply {
             begin()
+            applyMasking()
             draw(
                     texture,
                     shape.x, shape.y,
@@ -188,14 +258,18 @@ class Paw(private val batch: SpriteBatch, val key: String, private val debugShap
             )
             end()
         }
-    }
 
-    fun debugDrawObjectBorder() {
-//        val vertices = shape.transformedVertices
-//        debugShapeRenderer.color = Color.CYAN
-//        debugShapeRenderer.polygon(vertices)
-//        debugShapeRenderer.circle(position.x, position.y, 100f)
-//        debugShapeRenderer.rect(100f, 100f, 100f, 100f)
+        disableMasking()
+
+        maskRenderer.apply {
+            begin(ShapeRenderer.ShapeType.Line)
+            color = Color.CYAN
+            polygon(shape.transformedVertices)
+            color = Color.FIREBRICK
+            polygon(shape.vertices)
+            end()
+        }
+
     }
 
     var complete = false
@@ -204,4 +278,29 @@ class Paw(private val batch: SpriteBatch, val key: String, private val debugShap
     fun onRemove() {
 
     }
+}
+
+private fun enableMasking() {
+    //2. clear our depth buffer with 1.0
+    Gdx.gl.glClearDepthf(1f)
+    Gdx.gl.glClear(GL20.GL_DEPTH_BUFFER_BIT)
+    //3. set the function to LESS
+    Gdx.gl.glDepthFunc(GL20.GL_LESS)
+    //4. enable depth writing
+    Gdx.gl.glEnable(GL20.GL_DEPTH_TEST)
+    //5. Enable depth writing, disable RGBA color writing
+    Gdx.gl.glDepthMask(true)
+    Gdx.gl.glColorMask(false, false, false, false)
+}
+
+private fun applyMasking() {
+    //8. Enable RGBA color writing
+    //   (SpriteBatch.begin() will disable depth mask)
+    Gdx.gl.glColorMask(true, true, true, true);
+    //10. Now depth discards pixels outside our masked shapes
+    Gdx.gl.glDepthFunc(GL20.GL_EQUAL)
+}
+
+private fun disableMasking() {
+    Gdx.gl.glDisable(GL20.GL_DEPTH_TEST)
 }
