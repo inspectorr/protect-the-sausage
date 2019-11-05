@@ -170,8 +170,8 @@ class Paw(private val batch: SpriteBatch, val key: String, private val maskRende
         val end = points[1]
 
         val vertices = floatToVector2(shape.transformedVertices)
-        val clockwise = mutableListOf(start, end)
-        val antiClockwise = mutableListOf(start, end)
+        val clockwise = mutableListOf(start)
+        val antiClockwise = mutableListOf(start)
 
         vertices.forEach {
             val determinant = determinant2x3(
@@ -181,6 +181,9 @@ class Paw(private val batch: SpriteBatch, val key: String, private val maskRende
             else antiClockwise.add(it)
         }
 
+        clockwise.add(end)
+        antiClockwise.add(end)
+
         val angle = shape.rotation * PI/180
         val origin = Vector2(shape.originX, shape.originY)
         val position = Vector2(shape.x, shape.y)
@@ -188,8 +191,6 @@ class Paw(private val batch: SpriteBatch, val key: String, private val maskRende
         val vertices1 = clockwise.map {
             val translated = Vector2(it.x - position.x, it.y - position.y)
             val rotated = rotatePoint(translated, angle.toFloat(), origin)
-//            Vector2(rotated.x - position.x, rotated.y - position.y)
-//            it
             rotated
         }
 
