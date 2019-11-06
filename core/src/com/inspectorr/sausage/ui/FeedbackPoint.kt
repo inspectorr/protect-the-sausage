@@ -8,7 +8,7 @@ import com.inspectorr.sausage.utils.rgba
 import java.util.*
 import kotlin.math.pow
 
-class FeedbackPoint(private val point: Vector2, private val shapeRenderer: ShapeRenderer, val key: String) {
+class FeedbackPoint(private val point: Vector2, private val shapeRenderer: ShapeRenderer) {
     companion object {
         const val feedbackLength = 0.3f
         const val initPointsCount = 150

@@ -79,7 +79,7 @@ class PlayScreen : ScreenAdapter() {
             pawsProgress += it.progress
         }
 
-        background.update(pawsProgress, time)
+        background.update(0f, time)
 
         // todo refactor
         sausage.apply {
@@ -108,28 +108,21 @@ class PlayScreen : ScreenAdapter() {
         addFeedbackPoint(x, y)
     }
 
-    private val feedbackPoints = mutableMapOf<String, FeedbackPoint>()
+    private val feedbackPoints = mutableListOf<FeedbackPoint>()
 
     private fun addFeedbackPoint(x: Float, y: Float) {
-        val key = randomString()
-        feedbackPoints[key] = FeedbackPoint(Vector2(x, y), shapeRenderer, key)
+        feedbackPoints.add(FeedbackPoint(Vector2(x, y), shapeRenderer))
     }
 
     private fun updateTouches(delta: Float) {
-        var removeKey = ""
-        var shouldRemove = false
-        feedbackPoints.values.forEach {
+        feedbackPoints.filter {
             it.timeLeft -= delta
-            if (it.timeLeft <= 0f) {
-                removeKey = it.key
-                shouldRemove = true
-            }
+            it.timeLeft > 0f
         }
-        if (shouldRemove) feedbackPoints.remove(removeKey)
     }
 
     private fun drawTouchFeedback() {
-        feedbackPoints.values.forEach {
+        feedbackPoints.forEach {
             it.draw()
         }
     }
