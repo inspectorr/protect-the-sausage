@@ -14,7 +14,17 @@ import com.inspectorr.sausage.utils.isOutOfScreen
 import com.inspectorr.sausage.utils.randomInt
 import kotlin.math.round
 
-class Paw(private val batch: SpriteBatch, val key: String, private val debugShapeRenderer: ShapeRenderer) {
+enum class PawState {
+    MOVING_CENTER,
+    MOVING_BACK,
+    PAUSE
+}
+
+class Paw(private val batch: SpriteBatch, private val debugShapeRenderer: ShapeRenderer) {
+    companion object {
+
+    }
+
     private lateinit var position: Vector2
     private var delta: Vector2
     private var start: Vector2
@@ -56,19 +66,13 @@ class Paw(private val batch: SpriteBatch, val key: String, private val debugShap
         }
     }
 
-    enum class State {
-        MOVING_CENTER,
-        MOVING_BACK,
-        PAUSE
-    }
-
-    private var state = State.MOVING_CENTER
+    var state = PawState.MOVING_CENTER
 
     private fun action() {
         when (state) {
-            State.MOVING_CENTER -> moveCenter()
-            State.MOVING_BACK -> moveBack()
-            State.PAUSE -> pause()
+            PawState.MOVING_CENTER -> moveCenter()
+            PawState.MOVING_BACK -> moveBack()
+            PawState.PAUSE -> pause()
         }
     }
 
@@ -87,7 +91,7 @@ class Paw(private val batch: SpriteBatch, val key: String, private val debugShap
     private var pauseTimer = 0f
     private fun setPause() {
         isPaused = true
-        state = State.PAUSE
+        state = PawState.PAUSE
         pauseTimer = pauseLength
     }
 
@@ -98,12 +102,12 @@ class Paw(private val batch: SpriteBatch, val key: String, private val debugShap
     private fun pause() {
         if (pauseTimer <= 0f) {
             isPaused = false
-            state = State.MOVING_BACK
+            state = PawState.MOVING_BACK
         }
     }
 
     private fun triggerState() {
-        if (state == State.MOVING_CENTER && !isPaused && distance(position, Screen.CENTER) < 20) {
+        if (state == PawState.MOVING_CENTER && !isPaused && distance(position, Screen.CENTER) < 20) {
             setPause()
         }
 
@@ -114,7 +118,7 @@ class Paw(private val batch: SpriteBatch, val key: String, private val debugShap
 
     fun onTouch() {
         println("paw touch")
-        state = State.MOVING_BACK
+        state = PawState.MOVING_BACK
     }
 
     private fun updateShape() {
@@ -162,7 +166,7 @@ class Paw(private val batch: SpriteBatch, val key: String, private val debugShap
     var complete = false
     val remove = { complete = true }
 
-    fun onRemove() {
-
+    fun onRemove(): Boolean {
+        return true
     }
 }

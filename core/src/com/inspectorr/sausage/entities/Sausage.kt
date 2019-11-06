@@ -1,6 +1,7 @@
 package com.inspectorr.sausage.entities
 
 import com.badlogic.gdx.Gdx
+import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.graphics.g2d.TextureRegion
@@ -8,9 +9,15 @@ import com.badlogic.gdx.math.Vector2
 import com.inspectorr.sausage.entities.Sausage.State.*
 import com.inspectorr.sausage.utils.animation
 
-class Sausage(private val batch: SpriteBatch) {
+class Sausage(camera: OrthographicCamera) {
     private val width = 256
     private val height = 256
+
+    private val batch = SpriteBatch()
+
+    init {
+        batch.projectionMatrix = camera.combined
+    }
 
     enum class State {
         FINE,
@@ -31,6 +38,7 @@ class Sausage(private val batch: SpriteBatch) {
 
     private var screamTimer = 0f
     private val fineToScreamingDuration = 0.4f
+
     fun scream(delta: Float) {
         if (screamTimer >= fineToScreamingDuration) {
             state = SCREAMING
