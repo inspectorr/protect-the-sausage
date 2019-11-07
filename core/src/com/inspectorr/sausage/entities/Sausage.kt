@@ -9,10 +9,10 @@ import com.badlogic.gdx.math.Vector2
 import com.inspectorr.sausage.entities.Sausage.State.*
 import com.inspectorr.sausage.utils.animation
 
-class Sausage(camera: OrthographicCamera) {
-    private val width = 256
-    private val height = 256
+const val SAUSAGE_WIDTH = 256
+const val SAUSAGE_HEIGHT = 256
 
+class Sausage(camera: OrthographicCamera) {
     private val batch = SpriteBatch()
 
     init {
@@ -28,13 +28,13 @@ class Sausage(camera: OrthographicCamera) {
     private var state = FINE
 
     private val fineTexture = Texture(Gdx.files.internal("sausage_fine_256_1-16.png"))
-    private val fineAnimation = animation(fineTexture, width, height, 16)
+    private val fineAnimation = animation(fineTexture, SAUSAGE_WIDTH, SAUSAGE_HEIGHT, 16)
 
     private val screamingTexture = Texture(Gdx.files.internal("sausage_screaming_256_1-4.png"))
-    private val screamingAnimation = animation(screamingTexture, width, height, 4)
+    private val screamingAnimation = animation(screamingTexture, SAUSAGE_WIDTH, SAUSAGE_HEIGHT, 4)
 
     private val fineToScreamingTexture = Texture(Gdx.files.internal("sausage_fine-to-screaming_256_1-4.png"))
-    private val fineToScreamingAnimation = animation(fineToScreamingTexture, width, height, 4)
+    private val fineToScreamingAnimation = animation(fineToScreamingTexture, SAUSAGE_WIDTH, SAUSAGE_HEIGHT, 4)
 
     private var screamTimer = 0f
     private val fineToScreamingDuration = 0.4f
@@ -61,13 +61,35 @@ class Sausage(camera: OrthographicCamera) {
         }
     }
 
-    private val offset = 20f
-    private val position = Vector2(-width/2f+offset, -height/2f+offset)
+    private val rawOffset = 20f
+    val scale = 2f
+    private val offset = scale*rawOffset
+
+    var position = Vector2(
+            -SAUSAGE_WIDTH*scale/2f+offset,
+            -SAUSAGE_HEIGHT*scale/2f+offset
+    )
+        set(value) {
+            println(value)
+            field = Vector2(
+                    value.x-SAUSAGE_WIDTH*scale/2f+offset,
+                    value.y-SAUSAGE_HEIGHT*scale/2f+offset
+            )
+        }
 
     fun draw(time: Float) {
         val frame = getFrame(time)
         batch.begin()
-        batch.draw(frame, position.x, position.y)
+        batch.draw(
+                frame,
+                position.x,
+                position.y,
+                0f, 0f,
+                SAUSAGE_WIDTH.toFloat(),
+                SAUSAGE_HEIGHT.toFloat(),
+                scale, scale,
+                0f
+        )
         batch.end()
     }
 

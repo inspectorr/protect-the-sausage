@@ -1,18 +1,23 @@
 package com.inspectorr.sausage.screens
 
 import com.badlogic.gdx.Gdx
+import com.badlogic.gdx.InputAdapter
 import com.badlogic.gdx.ScreenAdapter
 import com.badlogic.gdx.graphics.GL20
 import com.badlogic.gdx.graphics.OrthographicCamera
+import com.inspectorr.sausage.Game
+import com.inspectorr.sausage.Screens
 import com.inspectorr.sausage.entities.PawState
 import com.inspectorr.sausage.ui.Background
 import com.inspectorr.sausage.entities.Paws
+import com.inspectorr.sausage.entities.SAUSAGE_WIDTH
 import com.inspectorr.sausage.entities.Sausage
 import com.inspectorr.sausage.ui.FeedbackPoints
 import com.inspectorr.sausage.ui.Score
 import com.inspectorr.sausage.utils.Screen
+import com.inspectorr.sausage.utils.isOutOfScreen
 
-class PlayScreen : ScreenAdapter() {
+class PlayScreen(private val game: Game) : ScreenAdapter() {
     private val camera = OrthographicCamera(Screen.WIDTH, Screen.HEIGHT)
 
     private val background = Background(camera)
@@ -20,6 +25,10 @@ class PlayScreen : ScreenAdapter() {
     private val paws = Paws(camera)
     private val score = Score(camera)
     private val touches = FeedbackPoints(camera)
+
+    init {
+        Gdx.input.inputProcessor = PlayScreenInputAdapter(this)
+    }
 
     private var time = 0f
 
@@ -34,10 +43,25 @@ class PlayScreen : ScreenAdapter() {
 
         // todo refactor
         sausage.apply {
-            if (paws.list.any { it.state != PawState.MOVING_BACK }) {
+            val shouldScream = paws.list.any {
+                if (it.state == PawState.MOVING_BACK_KILL) {
+                    position = it.position
+                }
+                it.state != PawState.MOVING_BACK_EMPTY
+            }
+
+            if (shouldScream) {
                 scream(delta)
             } else {
                 stopScreaming()
+            }
+
+            if (isOutOfScreen(
+                            position,
+                            SAUSAGE_WIDTH*scale)
+            ) {
+                println("GAME OVER")
+                game.setScreen(Screens.GAME_OVER)
             }
         }
 
@@ -78,5 +102,18 @@ class PlayScreen : ScreenAdapter() {
         update(delta)
         clear()
         draw()
+    }
+}
+
+class PlayScreenInputAdapter(private val screen: PlayScreen) : InputAdapter() {
+    override fun touchDown(x: Int, y: Int, pointer: Int, button: Int): Boolean {
+        // your touch down code here
+        screen.handleTouch(x, y)
+        return true // return true to indicate the event was handled
+    }
+
+    override fun touchUp(x: Int, y: Int, pointer: Int, button: Int): Boolean {
+        // your touch up code here
+        return true // return true to indicate the event was handled
     }
 }

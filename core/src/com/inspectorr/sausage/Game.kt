@@ -2,40 +2,34 @@ package com.inspectorr.sausage
 
 import com.badlogic.gdx.ApplicationAdapter
 import com.badlogic.gdx.Gdx
-import com.badlogic.gdx.InputAdapter
+import com.badlogic.gdx.ScreenAdapter
+import com.inspectorr.sausage.screens.GameOverScreen
 import com.inspectorr.sausage.screens.PlayScreen
 
-class Game : ApplicationAdapter() {
+enum class Screens {
+    PLAY,
+    GAME_OVER,
+}
 
-    private lateinit var playScreen: PlayScreen
+val INIT_SCREEN = Screens.PLAY
+
+class Game : ApplicationAdapter() {
+    lateinit var screen: ScreenAdapter
+    fun setScreen(name: Screens) {
+        screen = when (name) {
+            Screens.PLAY -> PlayScreen(this)
+            Screens.GAME_OVER -> GameOverScreen(this)
+        }
+        screen.show()
+    }
 
     override fun create() {
-//        println(ImmediateModeRenderer20.createDefaultShader(false, true, 0))
-//        println(ShaderProgram.TEXCOORD_ATTRIBUTE)
-//        ShaderProgram.pedantic = false
-//        ShaderProgram.prependVertexCode = "#version 140\n#define varying out\n#define attribute in\n";
-//        ShaderProgram.prependFragmentCode = "#version 140\n#define varying in\n#define texture2D texture\n#define gl_FragColor fragColor\nout vec4 fragColor;\n";
-        playScreen = PlayScreen()
-        playScreen.show()
-
-        Gdx.input.inputProcessor = object : InputAdapter() {
-            override fun touchDown(x: Int, y: Int, pointer: Int, button: Int): Boolean {
-                // your touch down code here
-                playScreen.handleTouch(x, y)
-
-                return true // return true to indicate the event was handled
-            }
-
-            override fun touchUp(x: Int, y: Int, pointer: Int, button: Int): Boolean {
-                // your touch up code here
-                return true // return true to indicate the event was handled
-            }
-        }
+        setScreen(INIT_SCREEN)
     }
 
     override fun render() {
         val delta = Gdx.graphics.deltaTime
-        playScreen.render(delta)
+        screen.render(delta)
     }
 
     override fun dispose() {

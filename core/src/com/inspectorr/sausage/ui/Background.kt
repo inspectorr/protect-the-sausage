@@ -69,7 +69,7 @@ class Background(camera: OrthographicCamera) {
         val progress = ((time*speed - (time*speed).toInt()) * PI * 2).toFloat()
 
 
-        println("$time\n")
+//        println("$time\n")
 
         backgroundColorShader.apply {
             begin()

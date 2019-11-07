@@ -5,37 +5,46 @@ import com.badlogic.gdx.math.Vector2
 
 class Screen {
     companion object {
-        val TOP = Gdx.graphics.height/2f
-        val RIGHT = Gdx.graphics.width/2f
-        val BOTTOM = -Gdx.graphics.height/2f
-        val LEFT = -Gdx.graphics.width/2f
+        val TOP = Gdx.graphics.height / 2f
+        val RIGHT = Gdx.graphics.width / 2f
+        val BOTTOM = -Gdx.graphics.height / 2f
+        val LEFT = -Gdx.graphics.width / 2f
         val CENTER = Vector2(0f, 0f)
         val HEIGHT = Gdx.graphics.height.toFloat()
         val WIDTH = Gdx.graphics.width.toFloat()
     }
 }
 
-fun isOutOfTop(position: Vector2) : Boolean {
-    return position.y > Screen.TOP
+const val DEFAULT_MARGIN = 0f
+
+fun isOutOfTop(position: Vector2, margin: Float): Boolean {
+    return position.y - margin > Screen.TOP
 }
 
-fun isOutOfRight(position: Vector2) : Boolean {
-    return position.x > Screen.RIGHT
+fun isOutOfRight(position: Vector2, margin: Float): Boolean {
+    return position.x - margin > Screen.RIGHT
 }
 
-fun isOutOfBottom(position: Vector2) : Boolean {
-    return position.y < Screen.BOTTOM
+fun isOutOfBottom(position: Vector2, margin: Float): Boolean {
+    return position.y + margin < Screen.BOTTOM
 }
 
-fun isOutOfLeft(position: Vector2) : Boolean {
-    return position.x < Screen.LEFT
+fun isOutOfLeft(position: Vector2, margin: Float): Boolean {
+    return position.x + margin < Screen.LEFT
 }
 
-fun isOutOfScreen(position: Vector2) : Boolean {
-    return isOutOfTop(position) || isOutOfRight(position) || isOutOfBottom(position) || isOutOfLeft(position)
+fun isOutOfScreen(position: Vector2, margin: Float = DEFAULT_MARGIN): Boolean {
+    return isOutOfTop(position, margin) ||
+            isOutOfRight(position, margin) ||
+            isOutOfBottom(position, margin) ||
+            isOutOfLeft(position, margin)
 }
 
 fun distance(v1: Vector2, v2: Vector2): Int {
     return v1.dst(v2).toInt()
+}
+
+fun relativeValue(value: Float): Float {
+    return value * Gdx.graphics.density
 }
 

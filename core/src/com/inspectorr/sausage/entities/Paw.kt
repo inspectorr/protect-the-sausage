@@ -16,16 +16,13 @@ import kotlin.math.round
 
 enum class PawState {
     MOVING_CENTER,
-    MOVING_BACK,
+    MOVING_BACK_EMPTY,
+    MOVING_BACK_KILL,
     PAUSE
 }
 
 class Paw(private val batch: SpriteBatch, private val debugShapeRenderer: ShapeRenderer) {
-    companion object {
-
-    }
-
-    private lateinit var position: Vector2
+    lateinit var position: Vector2
     private var delta: Vector2
     private var start: Vector2
 
@@ -71,7 +68,8 @@ class Paw(private val batch: SpriteBatch, private val debugShapeRenderer: ShapeR
     private fun action() {
         when (state) {
             PawState.MOVING_CENTER -> moveCenter()
-            PawState.MOVING_BACK -> moveBack()
+            PawState.MOVING_BACK_EMPTY -> moveBack()
+            PawState.MOVING_BACK_KILL -> moveBack()
             PawState.PAUSE -> pause()
         }
     }
@@ -87,7 +85,7 @@ class Paw(private val batch: SpriteBatch, private val debugShapeRenderer: ShapeR
     }
 
     private var isPaused = false
-    private val pauseLength = 0.5f
+    private val pauseLength = 0.1f
     private var pauseTimer = 0f
     private fun setPause() {
         isPaused = true
@@ -102,7 +100,7 @@ class Paw(private val batch: SpriteBatch, private val debugShapeRenderer: ShapeR
     private fun pause() {
         if (pauseTimer <= 0f) {
             isPaused = false
-            state = PawState.MOVING_BACK
+            state = PawState.MOVING_BACK_KILL
         }
     }
 
@@ -111,14 +109,14 @@ class Paw(private val batch: SpriteBatch, private val debugShapeRenderer: ShapeR
             setPause()
         }
 
-        if (isOutOfScreen(position)) {
+        if (state == PawState.MOVING_BACK_EMPTY && isOutOfScreen(position)) {
             remove()
         }
     }
 
     fun onTouch() {
         println("paw touch")
-        state = PawState.MOVING_BACK
+        state = PawState.MOVING_BACK_EMPTY
     }
 
     private fun updateShape() {

@@ -37,7 +37,6 @@ class Paws(private val camera: OrthographicCamera) {
             progress += it.progress
             it.update(delta)
             it.complete && it.onRemove()
-
         }
     }
 
