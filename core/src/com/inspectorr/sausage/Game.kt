@@ -11,7 +11,7 @@ enum class Screens {
     GAME_OVER,
 }
 
-val INIT_SCREEN = Screens.PLAY
+val INIT_SCREEN = Screens.GAME_OVER
 
 class Game : ApplicationAdapter() {
     lateinit var screen: ScreenAdapter

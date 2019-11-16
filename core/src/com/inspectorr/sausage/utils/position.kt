@@ -2,6 +2,7 @@ package com.inspectorr.sausage.utils
 
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.math.Vector2
+import kotlin.math.abs
 
 class Screen {
     companion object {
@@ -12,6 +13,7 @@ class Screen {
         val CENTER = Vector2(0f, 0f)
         val HEIGHT = Gdx.graphics.height.toFloat()
         val WIDTH = Gdx.graphics.width.toFloat()
+        val TEXTURE_SCALE = if (Gdx.graphics.density <= 2f) Gdx.graphics.density else 2f
     }
 }
 
@@ -41,7 +43,7 @@ fun isOutOfScreen(position: Vector2, margin: Float = DEFAULT_MARGIN): Boolean {
 }
 
 fun distance(v1: Vector2, v2: Vector2): Int {
-    return v1.dst(v2).toInt()
+    return abs(v1.dst(v2).toInt())
 }
 
 fun relativeValue(value: Float): Float {

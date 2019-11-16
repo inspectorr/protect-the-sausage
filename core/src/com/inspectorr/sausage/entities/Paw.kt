@@ -4,14 +4,11 @@ import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.graphics.g2d.TextureRegion
-import kotlin.math.atan2
 import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.math.*
-import com.inspectorr.sausage.utils.Screen
-import com.inspectorr.sausage.utils.distance
-import com.inspectorr.sausage.utils.isOutOfScreen
-import com.inspectorr.sausage.utils.randomInt
+import com.inspectorr.sausage.utils.*
+import kotlin.math.atan2
 import kotlin.math.round
 
 enum class PawState {
@@ -21,12 +18,14 @@ enum class PawState {
     PAUSE
 }
 
+val textures = listOf("paw1.png", "paw2.png", "paw3.png")
+
 class Paw(private val batch: SpriteBatch, private val debugShapeRenderer: ShapeRenderer) {
     lateinit var position: Vector2
     private var delta: Vector2
     private var start: Vector2
 
-    private val texture = TextureRegion(Texture(Gdx.files.internal("4.png")))
+    private val texture = TextureRegion(Texture(asset(textures[randomInt(3)])))
     private val textureWidth = texture.regionWidth.toFloat()
     private val textureHeight = texture.regionHeight.toFloat()
 
@@ -59,7 +58,7 @@ class Paw(private val batch: SpriteBatch, private val debugShapeRenderer: ShapeR
                     textureWidth, textureHeight,
                     textureWidth, 0f
             )
-            setScale(2f, 2f)
+            setScale(Screen.TEXTURE_SCALE*0.9f, Screen.TEXTURE_SCALE*0.9f)
         }
     }
 
@@ -104,8 +103,10 @@ class Paw(private val batch: SpriteBatch, private val debugShapeRenderer: ShapeR
         }
     }
 
+    private val offset = relativeValue(10f)
+
     private fun triggerState() {
-        if (state == PawState.MOVING_CENTER && !isPaused && distance(position, Screen.CENTER) < 20) {
+        if (state == PawState.MOVING_CENTER && !isPaused && distance(position, Screen.CENTER) <= offset) {
             setPause()
         }
 
@@ -133,7 +134,7 @@ class Paw(private val batch: SpriteBatch, private val debugShapeRenderer: ShapeR
         updateShape()
     }
 
-    val angle: Float get() = atan2(position.y, position.x)*(180/Math.PI).toFloat()
+    private val angle: Float get() = atan2(position.y, position.x)*(180/Math.PI).toFloat()
     val progress: Float get() {
         val posToDelta = position.x / delta.x
         val progress = if (posToDelta + 1 > 0f) posToDelta + 1 else 0f
@@ -165,6 +166,7 @@ class Paw(private val batch: SpriteBatch, private val debugShapeRenderer: ShapeR
     val remove = { complete = true }
 
     fun onRemove(): Boolean {
+        // todo эээ
         return true
     }
 }

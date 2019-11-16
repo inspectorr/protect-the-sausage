@@ -1,6 +1,7 @@
 package com.inspectorr.sausage.ui
 
 import com.badlogic.gdx.Gdx
+import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.graphics.g2d.GlyphLayout
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
@@ -20,7 +21,7 @@ class Text(
         private val generator: FreeTypeFontGenerator = FreeTypeFontGenerator(asset("fonts/fr73.ttf"))
 ) {
     private var font: BitmapFont
-    private val parameter = FreeTypeFontGenerator.FreeTypeFontParameter()
+    val parameter = FreeTypeFontGenerator.FreeTypeFontParameter()
 
     init {
         parameter.size = FONT_SIZE
@@ -47,6 +48,8 @@ class Text(
         }
 
     var content: String = initContent
+//    var borderColor: Color = Color.WHITE
+//    var borderWidth: Float = 0f
 
     fun update() {
         font.dispose()
@@ -56,6 +59,7 @@ class Text(
     }
 
     fun draw(x: Float, y: Float) {
+        update()
         font.draw(
                 batch,
                 parameter.characters,

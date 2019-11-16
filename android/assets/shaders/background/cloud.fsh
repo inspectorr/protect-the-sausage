@@ -26,9 +26,9 @@ float noise (in vec2 st) {
 
     float offset = cos(u_progress) * sin(u_progress);
 //    if (mod(floor(u_time), 2.0) == 0.0) {
-//        offset = cos(u_time*speed);
+//        scaledOffset = cos(u_time*speed);
 //    } else {
-//        offset = sin(u_time*speed);
+//        scaledOffset = sin(u_time*speed);
 //    }
 
     // Four corners in 2D of a tile

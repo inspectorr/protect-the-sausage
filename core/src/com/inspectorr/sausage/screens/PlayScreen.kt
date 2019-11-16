@@ -56,11 +56,7 @@ class PlayScreen(private val game: Game) : ScreenAdapter() {
                 stopScreaming()
             }
 
-            if (isOutOfScreen(
-                            position,
-                            SAUSAGE_WIDTH*scale)
-            ) {
-                println("GAME OVER")
+            if (isOutOfScreen(position, SAUSAGE_WIDTH*scale)) {
                 game.setScreen(Screens.GAME_OVER)
             }
         }

@@ -9,7 +9,6 @@ import com.inspectorr.sausage.utils.asset
 import com.inspectorr.sausage.utils.glEnableAlpha
 import com.inspectorr.sausage.utils.rgba
 import kotlin.math.PI
-import kotlin.math.sin
 
 val START_BG_COLOR = rgba(80f, 160f, 250f)
 val END_BG_COLOR = rgba(80f, 70f, 140f)
@@ -19,11 +18,12 @@ val deltaGreen = END_BG_COLOR.g - START_BG_COLOR.g
 val deltaBlue = END_BG_COLOR.b - START_BG_COLOR.b
 
 class Background(camera: OrthographicCamera) {
-    private val roundShader = ShaderProgram(
-            asset("shaders/background/round.vsh"),
-            asset("shaders/background/round.fsh")
+    private val raysShader = ShaderProgram(
+            asset("shaders/background/rays.vsh"),
+            asset("shaders/background/rays.fsh")
     )
-    private val roundRenderer = ShapeRenderer(5000, roundShader)
+//    private val roundRenderer = ShapeRenderer(5000, raysShader)
+    private val roundRenderer = ShapeRenderer()
 
     private val backgroundColorShader = ShaderProgram(
             asset("shaders/background/cloud.vsh"),
@@ -35,8 +35,8 @@ class Background(camera: OrthographicCamera) {
     init {
         roundRenderer.projectionMatrix = camera.combined
         backgroundColorRenderer.projectionMatrix = camera.combined
-        println("roundShader ${roundShader.isCompiled}")
-        println(roundShader.log)
+        println("raysShader ${raysShader.isCompiled}")
+        println(raysShader.log)
         println("backgroundColorShader ${backgroundColorShader.isCompiled}")
         println(backgroundColorShader.log)
     }
@@ -89,17 +89,19 @@ class Background(camera: OrthographicCamera) {
         }
     }
 
-    private fun setRoundShader(progress: Float) {
-        roundShader.apply {
+    val p = 10000f
+    private fun setRaysShader(time: Float) {
+//        val t = (time*p).roundToInt() % (PI*2*p).roundToInt()
+        val t = time % 10f
+        raysShader.apply {
             begin()
-            setUniformf(
-                    "u_progress",
-                    sin(progress)
-//                        progress
-            )
             setUniformf(
                     "u_resolution",
                     Screen.WIDTH, Screen.HEIGHT
+            )
+            setUniformf(
+                    "u_time",
+                    t
             )
             end()
         }
@@ -122,7 +124,7 @@ class Background(camera: OrthographicCamera) {
     }
 
     fun update(pawProgress: Float, time: Float) {
-        setRoundShader(pawProgress)
+        setRaysShader(time)
         setBackgroundColorShader(time)
         updateBackgroundColor(pawProgress)
         updateRoundColor(pawProgress)

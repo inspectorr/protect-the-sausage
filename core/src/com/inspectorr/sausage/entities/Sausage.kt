@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.math.Vector2
 import com.inspectorr.sausage.entities.Sausage.State.*
+import com.inspectorr.sausage.utils.Screen
 import com.inspectorr.sausage.utils.animation
 
 const val SAUSAGE_WIDTH = 256
@@ -61,34 +62,27 @@ class Sausage(camera: OrthographicCamera) {
         }
     }
 
-    private val rawOffset = 20f
-    val scale = 2f
-    private val offset = scale*rawOffset
+    var offset = 40f
+    var scale = Screen.TEXTURE_SCALE
+    private val scaledOffset: Float
+        get() = scale*offset
 
-    var position = Vector2(
-            -SAUSAGE_WIDTH*scale/2f+offset,
-            -SAUSAGE_HEIGHT*scale/2f+offset
-    )
-        set(value) {
-            println(value)
-            field = Vector2(
-                    value.x-SAUSAGE_WIDTH*scale/2f+offset,
-                    value.y-SAUSAGE_HEIGHT*scale/2f+offset
-            )
-        }
+    var position = Vector2(0f, 0f)
+    var rotation = 0f
 
     fun draw(time: Float) {
         val frame = getFrame(time)
         batch.begin()
         batch.draw(
                 frame,
-                position.x,
-                position.y,
-                0f, 0f,
+                position.x-scaledOffset,
+                position.y-scaledOffset,
+                SAUSAGE_WIDTH/2f,
+                SAUSAGE_HEIGHT/2f,
                 SAUSAGE_WIDTH.toFloat(),
                 SAUSAGE_HEIGHT.toFloat(),
                 scale, scale,
-                0f
+                rotation
         )
         batch.end()
     }
