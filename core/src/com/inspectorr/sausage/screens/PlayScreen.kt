@@ -5,6 +5,9 @@ import com.badlogic.gdx.InputAdapter
 import com.badlogic.gdx.ScreenAdapter
 import com.badlogic.gdx.graphics.GL20
 import com.badlogic.gdx.graphics.OrthographicCamera
+import com.badlogic.gdx.math.Vector2
+import com.badlogic.gdx.math.Vector3
+import com.inspectorr.sausage.Assets
 import com.inspectorr.sausage.Game
 import com.inspectorr.sausage.Screens
 import com.inspectorr.sausage.entities.PawState
@@ -12,41 +15,61 @@ import com.inspectorr.sausage.ui.Background
 import com.inspectorr.sausage.entities.Paws
 import com.inspectorr.sausage.entities.SAUSAGE_WIDTH
 import com.inspectorr.sausage.entities.Sausage
+import com.inspectorr.sausage.ui.Fader
 import com.inspectorr.sausage.ui.FeedbackPoints
 import com.inspectorr.sausage.ui.Score
 import com.inspectorr.sausage.utils.Screen
+import com.inspectorr.sausage.utils.distance
 import com.inspectorr.sausage.utils.isOutOfScreen
+import com.inspectorr.sausage.utils.randomFloat
+import kotlin.math.sin
 
-class PlayScreen(private val game: Game) : ScreenAdapter() {
+class PlayScreen(private val game: Game, assets: Assets) : ScreenAdapter() {
     private val camera = OrthographicCamera(Screen.WIDTH, Screen.HEIGHT)
-
     private val background = Background(camera)
-    private val sausage = Sausage(camera)
-    private val paws = Paws(camera)
+
+    private val sausage = Sausage(camera, assets)
+    private val paws = Paws(camera, assets)
     private val score = Score(camera)
-    private val touches = FeedbackPoints(camera)
+    private val touches = FeedbackPoints(camera, assets)
+    private val fader = Fader(camera)
 
     init {
+        game.playerScore = 0
         Gdx.input.inputProcessor = PlayScreenInputAdapter(this)
     }
+
 
     private var time = 0f
 
     override fun show() {
-        paws.add()
+//        paws.add()
     }
+
+    private val rotationSpeed = 30f
 
     private fun update(delta: Float) {
         time += delta
 
-        background.update(0f, time)
+//        sausage.rotation = (delta*(sin(time*3))*rotationSpeed)
+        sausage.rotation = sin(time)*rotationSpeed
+
+        val killingPaw = paws.list.find { it.state == PawState.MOVING_BACK_KILL }
+        if (killingPaw != null) {
+            val distanceToStart = distance(sausage.position, killingPaw.start) / distance(killingPaw.start, Vector2(0f, 0f)).toFloat()
+            fader.update(distanceToStart)
+        }
+
+//        background.update(dist, time)
 
         // todo refactor
         sausage.apply {
             val shouldScream = paws.list.any {
                 if (it.state == PawState.MOVING_BACK_KILL) {
                     position = it.position
+                    paws.restrictNewPaws = true
                 }
+                paws.restrictNewPaws = false
                 it.state != PawState.MOVING_BACK_EMPTY
             }
 
@@ -69,16 +92,21 @@ class PlayScreen(private val game: Game) : ScreenAdapter() {
     }
 
     fun handleTouch(screenX: Int, screenY: Int) {
-        val x = screenX - Gdx.graphics.width/2f
-        val y = -screenY + Gdx.graphics.height/2f
-        println("x: $x, y: $y")
+        val touch = camera.unproject(Vector3(screenX.toFloat(), screenY.toFloat(), 0f))
+        var hit = false
         paws.list.forEach {
-            if (it.shape.contains(x, y)) {
+            if (
+                    it.shape.contains(touch.x, touch.y) &&
+                    it.state != PawState.MOVING_BACK_KILL &&
+                    it.state != PawState.MOVING_BACK_EMPTY
+            ) {
                 score.increment()
+                game.playerScore = score.points
                 it.onTouch()
+                hit = true
             }
         }
-        touches.add(x, y)
+        touches.add(touch.x, touch.y, hit)
     }
 
     private fun clear() {
@@ -90,6 +118,7 @@ class PlayScreen(private val game: Game) : ScreenAdapter() {
         background.draw()
         sausage.draw(time)
         paws.draw()
+        fader.draw()
         score.draw()
         touches.draw()
     }
@@ -98,6 +127,10 @@ class PlayScreen(private val game: Game) : ScreenAdapter() {
         update(delta)
         clear()
         draw()
+    }
+
+    override fun dispose() {
+        sausage.dispose()
     }
 }
 

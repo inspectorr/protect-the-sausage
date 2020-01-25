@@ -5,8 +5,8 @@ import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.graphics.OrthographicCamera
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.math.*
+import com.inspectorr.sausage.Assets
 import com.inspectorr.sausage.utils.*
 import kotlin.math.atan2
 import kotlin.math.round
@@ -18,24 +18,25 @@ enum class PawState {
     PAUSE
 }
 
-val textures = listOf("paw1.png", "paw2.png", "paw3.png")
 
-class Paw(private val batch: SpriteBatch, private val debugShapeRenderer: ShapeRenderer) {
+class Paw(private val batch: SpriteBatch, private val texture: Texture) {
     lateinit var position: Vector2
     private var delta: Vector2
-    private var start: Vector2
+    var start: Vector2
 
-    private val texture = TextureRegion(Texture(asset(textures[randomInt(3)])))
-    private val textureWidth = texture.regionWidth.toFloat()
-    private val textureHeight = texture.regionHeight.toFloat()
+    private val textureRegion = TextureRegion(texture)
+    private val textureWidth = textureRegion.regionWidth.toFloat()
+    private val textureHeight = textureRegion.regionHeight.toFloat()
 
     private fun randomX() = randomInt(Gdx.graphics.width).toFloat() - Screen.RIGHT
     private fun randomY() = randomInt(Gdx.graphics.height).toFloat() - Screen.TOP
 
-    private fun randomPosTop() = Vector2(randomX(), Screen.TOP)
-    private fun randomPosRight() = Vector2(Screen.RIGHT, randomY())
-    private fun randomPosBottom() = Vector2(randomX(), Screen.BOTTOM)
-    private fun randomPosLeft() = Vector2(Screen.LEFT, randomY())
+    private val MARGIN = 500
+
+    private fun randomPosTop() = Vector2(randomX(), Screen.TOP+MARGIN)
+    private fun randomPosRight() = Vector2(Screen.RIGHT+MARGIN, randomY())
+    private fun randomPosBottom() = Vector2(randomX(), Screen.BOTTOM-MARGIN)
+    private fun randomPosLeft() = Vector2(Screen.LEFT-MARGIN, randomY())
 
     val shape = Polygon()
 
@@ -64,23 +65,29 @@ class Paw(private val batch: SpriteBatch, private val debugShapeRenderer: ShapeR
 
     var state = PawState.MOVING_CENTER
 
-    private fun action() {
+    private fun action(delta: Float) {
         when (state) {
-            PawState.MOVING_CENTER -> moveCenter()
-            PawState.MOVING_BACK_EMPTY -> moveBack()
-            PawState.MOVING_BACK_KILL -> moveBack()
+            PawState.MOVING_CENTER -> moveCenter(delta)
+            PawState.MOVING_BACK_EMPTY -> moveBack(delta)
+            PawState.MOVING_BACK_KILL -> moveBack(delta)
             PawState.PAUSE -> pause()
         }
     }
 
-    private val centerSpeed = 0.01f
-    private fun moveCenter() {
-        position.add(delta.x*centerSpeed,delta.y*centerSpeed)
+    private val centerSpeed = 0.75f
+    private fun moveCenter(deltaTime: Float) {
+        position.add(
+                delta.x*centerSpeed*deltaTime,
+                delta.y*centerSpeed*deltaTime
+        )
     }
 
-    private val backSpeed = 0.075f
-    private fun moveBack() {
-        position.add(-delta.x*backSpeed,-delta.y*backSpeed)
+    private val backSpeed = 3f
+    private fun moveBack(deltaTime: Float) {
+        position.add(
+                -delta.x*backSpeed*deltaTime,
+                -delta.y*backSpeed*deltaTime
+        )
     }
 
     private var isPaused = false
@@ -116,7 +123,7 @@ class Paw(private val batch: SpriteBatch, private val debugShapeRenderer: ShapeR
     }
 
     fun onTouch() {
-        println("paw touch")
+        if (state == PawState.MOVING_BACK_KILL) return
         state = PawState.MOVING_BACK_EMPTY
     }
 
@@ -130,7 +137,7 @@ class Paw(private val batch: SpriteBatch, private val debugShapeRenderer: ShapeR
     fun update(delta: Float) {
         handlePauseTimer(delta)
         triggerState()
-        action()
+        action(delta)
         updateShape()
     }
 
@@ -141,10 +148,10 @@ class Paw(private val batch: SpriteBatch, private val debugShapeRenderer: ShapeR
         return round(progress * 100f) / 100f
     }
 
-    fun draw(camera: OrthographicCamera) {
+    fun draw(time: Float) {
         batch.begin()
         batch.draw(
-             texture,
+             textureRegion,
              shape.x, shape.y,
              shape.originX, shape.originY,
              textureWidth, textureHeight,
@@ -163,7 +170,9 @@ class Paw(private val batch: SpriteBatch, private val debugShapeRenderer: ShapeR
     }
 
     var complete = false
-    val remove = { complete = true }
+    val remove = {
+        complete = true
+    }
 
     fun onRemove(): Boolean {
         // todo эээ

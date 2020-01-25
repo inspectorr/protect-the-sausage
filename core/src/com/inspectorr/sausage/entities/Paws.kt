@@ -1,18 +1,31 @@
 package com.inspectorr.sausage.entities
 
 import com.badlogic.gdx.graphics.OrthographicCamera
+import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
+import com.inspectorr.sausage.Assets
 import com.inspectorr.sausage.utils.randomFloat
+import com.inspectorr.sausage.utils.randomInt
+import kotlin.math.abs
+import kotlin.math.sin
 
-class Paws(private val camera: OrthographicCamera) {
+class Paws(private val camera: OrthographicCamera, assets: Assets) {
     private val batch = SpriteBatch()
     private val maskRenderer = ShapeRenderer()
+    private val textureVariants = listOf(
+            "paw1.png",
+            "paw2.png",
+            "paw3.png"
+    ).map { assets.get(it, Texture::class.java) }
 
     var list = mutableListOf<Paw>()
 
-    fun add() {
-        list.add(Paw(batch, ShapeRenderer()))
+    var restrictNewPaws = false
+
+    private fun add() {
+        if (restrictNewPaws) return
+        list.add(Paw(batch, textureVariants[randomInt(3)]))
     }
 
     init {
@@ -27,14 +40,16 @@ class Paws(private val camera: OrthographicCamera) {
 
     // todo time function
     private val pawFreq: Float
-        get() = 2f + randomFloat(5f)
-//        get() = 0.2f + randomFloat(5f)
-
+        get() = randomFloat(5f) + randomFloat(10f)*abs(sin(timer))
     private var pawTimer = 0f
 
     var progress = 0f
 
     fun update(delta: Float) {
+
+//        batch.projectionMatrix = camera.combined
+//        maskRenderer.projectionMatrix = camera.combined
+
         timer += delta
 
         progress = 0f
@@ -53,6 +68,6 @@ class Paws(private val camera: OrthographicCamera) {
     }
 
     fun draw() {
-        list.forEach { it.draw(camera) }
+        list.forEach { it.draw(timer) }
     }
 }

@@ -12,3 +12,12 @@ fun glEnableAlpha() {
     Gdx.gl.glEnable(GL20.GL_BLEND)
     Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA)
 }
+
+fun generateColor(max: Float = 255f, min: Float = 0f, alpha: Float = 1f) : Color {
+    return rgba(
+            min + randomFloat(max-min),
+            min + randomFloat(max-min),
+            min + randomFloat(max-min),
+            alpha
+    )
+}

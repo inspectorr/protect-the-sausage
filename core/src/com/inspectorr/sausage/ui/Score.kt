@@ -9,17 +9,18 @@ import com.inspectorr.sausage.utils.rgba
 
 const val INIT_POINTS = 0
 
-class Score(camera: OrthographicCamera) {
-    private var points = INIT_POINTS
+class Score(camera: OrthographicCamera, initPoints: Int = INIT_POINTS) {
+    var points = initPoints
     private val batch = SpriteBatch()
     private val text = Text(batch, points.toString())
 
     init {
-        batch.projectionMatrix = camera.combined
-        text.size = 100
+        text.size = 75
         text.content = "$points"
-        text.parameter.borderColor = rgba(255F, 191F, 0F)
+        text.parameter.borderColor = rgba(255F, 170F, 0F)
         text.parameter.borderWidth = 3f * Gdx.graphics.density
+        batch.projectionMatrix = camera.combined
+        draw()
     }
 
     fun increment() {

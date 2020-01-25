@@ -17,7 +17,7 @@ class Screen {
     }
 }
 
-const val DEFAULT_MARGIN = 0f
+const val DEFAULT_MARGIN = 500f
 
 fun isOutOfTop(position: Vector2, margin: Float): Boolean {
     return position.y - margin > Screen.TOP

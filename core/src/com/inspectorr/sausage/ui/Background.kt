@@ -4,10 +4,7 @@ import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.graphics.glutils.ShaderProgram
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
-import com.inspectorr.sausage.utils.Screen
-import com.inspectorr.sausage.utils.asset
-import com.inspectorr.sausage.utils.glEnableAlpha
-import com.inspectorr.sausage.utils.rgba
+import com.inspectorr.sausage.utils.*
 import kotlin.math.PI
 
 val START_BG_COLOR = rgba(80f, 160f, 250f)
@@ -18,10 +15,10 @@ val deltaGreen = END_BG_COLOR.g - START_BG_COLOR.g
 val deltaBlue = END_BG_COLOR.b - START_BG_COLOR.b
 
 class Background(camera: OrthographicCamera) {
-    private val raysShader = ShaderProgram(
-            asset("shaders/background/rays.vsh"),
-            asset("shaders/background/rays.fsh")
-    )
+//    private val raysShader = ShaderProgram(
+//            asset("shaders/background/rays.vsh"),
+//            asset("shaders/background/rays.fsh")
+//    )
 //    private val roundRenderer = ShapeRenderer(5000, raysShader)
     private val roundRenderer = ShapeRenderer()
 
@@ -29,16 +26,16 @@ class Background(camera: OrthographicCamera) {
             asset("shaders/background/cloud.vsh"),
             asset("shaders/background/cloud.fsh")
     )
-//    private val backgroundColorRenderer = ShapeRenderer(5000, backgroundColorShader)
-    private val backgroundColorRenderer = ShapeRenderer()
+    private val backgroundColorRenderer = ShapeRenderer(5000, backgroundColorShader)
+//    private val backgroundColorRenderer = ShapeRenderer()
 
     init {
         roundRenderer.projectionMatrix = camera.combined
         backgroundColorRenderer.projectionMatrix = camera.combined
-        println("raysShader ${raysShader.isCompiled}")
-        println(raysShader.log)
-        println("backgroundColorShader ${backgroundColorShader.isCompiled}")
-        println(backgroundColorShader.log)
+//        println("raysShader ${raysShader.isCompiled}")
+//        println(raysShader.log)
+//        println("backgroundColorShader ${backgroundColorShader.isCompiled}")
+//        println(backgroundColorShader.log)
     }
 
     private var backgroundColor = START_BG_COLOR
@@ -55,7 +52,7 @@ class Background(camera: OrthographicCamera) {
         backgroundColorRenderer.apply {
             begin(ShapeRenderer.ShapeType.Filled)
             glEnableAlpha()
-            color = backgroundColor
+            color = color
             rect(
                     Screen.LEFT, Screen.BOTTOM,
                     Screen.WIDTH, Screen.HEIGHT
@@ -69,7 +66,7 @@ class Background(camera: OrthographicCamera) {
         val progress = ((time*speed - (time*speed).toInt()) * PI * 2).toFloat()
 
 
-//        println("$time\n")
+        println("$time\n")
 
         backgroundColorShader.apply {
             begin()
@@ -88,33 +85,41 @@ class Background(camera: OrthographicCamera) {
             end()
         }
     }
-
-    val p = 10000f
-    private fun setRaysShader(time: Float) {
+//
+//    val p = 10000f
+//    private fun setRaysShader(time: Float) {
 //        val t = (time*p).roundToInt() % (PI*2*p).roundToInt()
-        val t = time % 10f
-        raysShader.apply {
-            begin()
-            setUniformf(
-                    "u_resolution",
-                    Screen.WIDTH, Screen.HEIGHT
-            )
-            setUniformf(
-                    "u_time",
-                    t
-            )
-            end()
-        }
-    }
-
+//        val t = time % 10f
+//        raysShader.apply {
+//            begin()
+//            setUniformf(
+//                    "u_resolution",
+//                    Screen.WIDTH, Screen.HEIGHT
+//            )
+//            setUniformf(
+//                    "u_time",
+//                    t
+//            )
+//            end()
+//        }
+//    }
+//
     private fun updateRoundColor(progress: Float) {
         roundRenderer.color = rgba(155f, 0f, 0f, progress)
     }
+
+    fun handlePawKill() {
+        currentColor = generateColor(180f)
+    }
+
+    private var currentColor = generateColor()
 
     private fun drawRound() {
         roundRenderer.apply {
             begin(ShapeRenderer.ShapeType.Filled)
             glEnableAlpha()
+            color = Color.WHITE
+//            color = currentColor
             rect(
                     Screen.LEFT, Screen.BOTTOM,
                     Screen.WIDTH, Screen.HEIGHT
@@ -124,10 +129,10 @@ class Background(camera: OrthographicCamera) {
     }
 
     fun update(pawProgress: Float, time: Float) {
-        setRaysShader(time)
+//        setRaysShader(time)
         setBackgroundColorShader(time)
         updateBackgroundColor(pawProgress)
-        updateRoundColor(pawProgress)
+//        updateRoundColor(pawProgress)
     }
 
     fun draw() {

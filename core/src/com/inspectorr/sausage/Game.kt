@@ -3,31 +3,48 @@ package com.inspectorr.sausage
 import com.badlogic.gdx.ApplicationAdapter
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.ScreenAdapter
+import com.badlogic.gdx.assets.AssetManager
+import com.badlogic.gdx.graphics.Texture
+import com.inspectorr.sausage.entities.Sausage
 import com.inspectorr.sausage.screens.GameOverScreen
 import com.inspectorr.sausage.screens.PlayScreen
+import com.badlogic.gdx.audio.Sound
 
 enum class Screens {
     PLAY,
     GAME_OVER,
 }
 
-val INIT_SCREEN = Screens.GAME_OVER
+val INIT_SCREEN = Screens.PLAY
 
 class Game : ApplicationAdapter() {
     lateinit var screen: ScreenAdapter
+    var isLaunched = false
+
     fun setScreen(name: Screens) {
+        if(isLaunched) screen.dispose()
+        isLaunched = true
         screen = when (name) {
-            Screens.PLAY -> PlayScreen(this)
-            Screens.GAME_OVER -> GameOverScreen(this)
+            Screens.PLAY -> PlayScreen(this, assets)
+            Screens.GAME_OVER -> GameOverScreen(this, playerScore, assets)
         }
         screen.show()
     }
 
+    var playerScore = 0
+
+    private val assets = Assets()
+
     override fun create() {
+        assets.init()
+        // типа он синхронно загружает пока я там жду в цикле но хз
         setScreen(INIT_SCREEN)
     }
 
     override fun render() {
+        if (!assets.areLoaded) return
+        assets.update()
+
         val delta = Gdx.graphics.deltaTime
         screen.render(delta)
     }
@@ -35,4 +52,61 @@ class Game : ApplicationAdapter() {
     override fun dispose() {
 
     }
+}
+
+// todo go deep in kotlin async...
+class Assets : AssetManager() {
+
+    private val textures = listOf(
+            "paw1.png",
+            "paw2.png",
+            "paw3.png",
+            "sausage_fine_256_1-16.png",
+            "sausage_fine-to-screaming_256_1-4.png",
+            "sausage_screaming_256_1-4.png"
+    )
+
+    enum class Entities {
+        SAUSAGE,
+        FEEDBACK_POINT,
+    }
+
+    private val sounds = mapOf(
+            Entities.SAUSAGE to mapOf(
+                    Sausage.State.FINE_TO_SCREAMING to "sounds/scream_start.wav",
+                    Sausage.State.SCREAMING to "sounds/scream_body.wav"
+            ),
+            Entities.FEEDBACK_POINT to mapOf(
+                    "BZZ" to "sounds/bzz.wav",
+                    "CLAP" to "sounds/clap.wav",
+                    "MISS" to "sounds/miss.wav",
+                    "bg" to "sounds/gameover.mp3"
+            )
+    )
+
+    var areLoaded = false
+
+    fun init(): Boolean {
+        textures.forEach {
+            load(it, Texture::class.java)
+        }
+
+        sounds.forEach { entry ->
+            entry.value.forEach {
+                load(it.value, Sound::class.java)
+            }
+        }
+
+        while (!update()) {
+            // wait)))
+        }
+
+        areLoaded = true
+
+        return areLoaded
+    }
+
+//    fun getTexture() {
+//        return get()
+//    }
 }
