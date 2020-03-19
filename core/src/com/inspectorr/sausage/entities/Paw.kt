@@ -4,9 +4,7 @@ import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.graphics.g2d.TextureRegion
-import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.math.*
-import com.inspectorr.sausage.Assets
 import com.inspectorr.sausage.utils.*
 import kotlin.math.atan2
 import kotlin.math.round
@@ -18,7 +16,6 @@ enum class PawState {
     PAUSE
 }
 
-
 class Paw(private val batch: SpriteBatch, private val texture: Texture) {
     lateinit var position: Vector2
     private var delta: Vector2
@@ -28,15 +25,15 @@ class Paw(private val batch: SpriteBatch, private val texture: Texture) {
     private val textureWidth = textureRegion.regionWidth.toFloat()
     private val textureHeight = textureRegion.regionHeight.toFloat()
 
-    private fun randomX() = randomInt(Gdx.graphics.width).toFloat() - Screen.RIGHT
-    private fun randomY() = randomInt(Gdx.graphics.height).toFloat() - Screen.TOP
+    private fun randomX() = randomInt(Gdx.graphics.width).toFloat() - UserScreen.RIGHT
+    private fun randomY() = randomInt(Gdx.graphics.height).toFloat() - UserScreen.TOP
 
     private val MARGIN = 500
 
-    private fun randomPosTop() = Vector2(randomX(), Screen.TOP+MARGIN)
-    private fun randomPosRight() = Vector2(Screen.RIGHT+MARGIN, randomY())
-    private fun randomPosBottom() = Vector2(randomX(), Screen.BOTTOM-MARGIN)
-    private fun randomPosLeft() = Vector2(Screen.LEFT-MARGIN, randomY())
+    private fun randomPosTop() = Vector2(randomX(), UserScreen.TOP+MARGIN)
+    private fun randomPosRight() = Vector2(UserScreen.RIGHT+MARGIN, randomY())
+    private fun randomPosBottom() = Vector2(randomX(), UserScreen.BOTTOM-MARGIN)
+    private fun randomPosLeft() = Vector2(UserScreen.LEFT-MARGIN, randomY())
 
     val shape = Polygon()
 
@@ -59,7 +56,7 @@ class Paw(private val batch: SpriteBatch, private val texture: Texture) {
                     textureWidth, textureHeight,
                     textureWidth, 0f
             )
-            setScale(Screen.TEXTURE_SCALE*0.9f, Screen.TEXTURE_SCALE*0.9f)
+            setScale(UserScreen.TEXTURE_SCALE*0.9f, UserScreen.TEXTURE_SCALE*0.9f)
         }
     }
 
@@ -113,7 +110,7 @@ class Paw(private val batch: SpriteBatch, private val texture: Texture) {
     private val offset = relativeValue(10f)
 
     private fun triggerState() {
-        if (state == PawState.MOVING_CENTER && !isPaused && distance(position, Screen.CENTER) <= offset) {
+        if (state == PawState.MOVING_CENTER && !isPaused && distance(position, UserScreen.CENTER) <= offset) {
             setPause()
         }
 
@@ -150,14 +147,7 @@ class Paw(private val batch: SpriteBatch, private val texture: Texture) {
 
     fun draw(time: Float) {
         batch.begin()
-        batch.draw(
-             textureRegion,
-             shape.x, shape.y,
-             shape.originX, shape.originY,
-             textureWidth, textureHeight,
-             shape.scaleX, shape.scaleY,
-             shape.rotation
-        )
+        batch.drawTextureRegionByShape(textureRegion, shape)
         batch.end()
     }
 

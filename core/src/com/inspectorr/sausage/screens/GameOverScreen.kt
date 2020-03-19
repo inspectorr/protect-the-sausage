@@ -10,40 +10,78 @@ import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.math.Vector2
+import com.badlogic.gdx.math.Vector3
 import com.inspectorr.sausage.Assets
 import com.inspectorr.sausage.Game
 import com.inspectorr.sausage.Screens
 import com.inspectorr.sausage.entities.Sausage
-import com.inspectorr.sausage.ui.Score
-import com.inspectorr.sausage.ui.Text
-import com.inspectorr.sausage.utils.Screen
-import com.inspectorr.sausage.utils.glEnableAlpha
-import com.inspectorr.sausage.utils.randomFloat
-import com.inspectorr.sausage.utils.relativeValue
+import com.inspectorr.sausage.ui.*
+import com.inspectorr.sausage.utils.*
+import java.util.*
+import kotlin.concurrent.schedule
 
 const val DURATION = 10f
 //const val MIN_DURATION = 0f
 const val MIN_DURATION = 2f
 
 class GameOverScreen(private val game: Game, scoreCount: Int, assets: Assets) : ScreenAdapter() {
-    private val camera = OrthographicCamera(Screen.WIDTH, Screen.HEIGHT)
+    private val camera = OrthographicCamera(UserScreen.WIDTH, UserScreen.HEIGHT)
 
     private val batch = SpriteBatch()
-    private val text = Text(batch, "GAME OVER")
+    private val sound = assets.get("sounds/gameover.mp3", Sound::class.java)
+
+    private val gameOverText = Text(batch, "GAME OVER")
+    private var highscoreText : Text
 
     private val sausage = Sausage(camera, assets)
     private val score = Score(camera, scoreCount)
+    private val touches = FeedbackPoints(camera, assets, silent=true)
+
+    private val navigateToPlayScreen = {
+        println("NAVIGATING")
+        game.setScreen(Screens.PLAY)
+    }
+
+    private val onEnd = {
+        fader.fadeOut()
+    }
+
+    private val playButton = PlayButton(batch, assets, onPress = onEnd)
+
+    private val fader = Fader(camera,
+            fadeInCallback = {},
+            fadeOutCallback = navigateToPlayScreen,
+            defaultAlpha = 0f
+    )
+
+    fun handleTouch(screenX: Int, screenY: Int) {
+        val touch = camera.unproject(Vector3(screenX.toFloat(), screenY.toFloat(), 0f))
+        println("touch x=${touch.x} y=${touch.y}")
+        val isButtonTouched = playButton.handleTouchStart(touch.x, touch.y)
+        if (!isButtonTouched) touches.add(touch.x, touch.y, false)
+    }
+
+    fun handleTouchEnd(screenX: Int, screenY: Int) {
+        playButton.handleTouchEnd()
+    }
 
     init {
         Gdx.input.inputProcessor = GameOverScreenInputAdapter(this)
         batch.projectionMatrix = camera.combined
-        text.size = 40
-        text.parameter.color = Color(1f, 1f, 1f, startAnimationProgress)
+
+        setHighscore(score.points)
+        highscoreText = Text(batch, "HIGHSCORE: ${getHighscore()}")
+        highscoreText.size = 20
+        highscoreText.parameter.color = Color(1f, 1f, 1f, 1f)
+
+        gameOverText.size = 40
+        gameOverText.parameter.color = Color(1f, 1f, 1f, startAnimationProgress)
+
         sausage.apply {
             scale = 0.3f
             position = Vector2(
-                    (randomFloat(Screen.WIDTH) - Screen.RIGHT)*0.7f,
-                    (randomFloat(Screen.HEIGHT) - Screen.TOP)*0.7f
+                    (randomFloat(UserScreen.WIDTH) - UserScreen.RIGHT)*0.7f,
+                    (randomFloat(UserScreen.HEIGHT) - UserScreen.TOP)*0.7f
             )
             rotation = randomFloat(360f)
             screamingLevel = 0f
@@ -51,10 +89,9 @@ class GameOverScreen(private val game: Game, scoreCount: Int, assets: Assets) : 
         }
     }
 
-    private val sound = assets.get("sounds/gameover.mp3", Sound::class.java)
-
     override fun show() {
         sound.play(0.2f)
+        fader.fadeIn()
     }
 
     private fun clear() {
@@ -63,11 +100,6 @@ class GameOverScreen(private val game: Game, scoreCount: Int, assets: Assets) : 
     }
 
     private var timer = 0f
-
-    private fun navigateToPlayScreen() {
-        println("NAVIGATING")
-        game.setScreen(Screens.PLAY)
-    }
 
     private val posSpeedPx = relativeValue(20f)
     private val angleSpeed = 40f
@@ -78,13 +110,17 @@ class GameOverScreen(private val game: Game, scoreCount: Int, assets: Assets) : 
             navigateToPlayScreen()
         }
 
-        text.parameter.color = Color(1f, 1f, 1f, startAnimationProgress)
+        gameOverText.parameter.color = Color(1f, 1f, 1f, startAnimationProgress)
 
 //        sausage.scream(delta)
         sausage.position.add(-posSpeedPx*delta, 0f)
         sausage.rotation += angleSpeed*delta
 
+        touches.update(delta)
+
         camera.update()
+
+        fader.update(delta)
     }
 
     private val startAnimationProgress: Float
@@ -94,23 +130,39 @@ class GameOverScreen(private val game: Game, scoreCount: Int, assets: Assets) : 
             return Interpolation.pow2In.apply(progress)
         }
 
-    private fun draw() {
-        sausage.draw(timer)
-        score.draw()
+    private fun drawHighscore() {
         batch.apply {
             begin()
             glEnableAlpha()
-            text.draw(
-                    -text.width/2,
-                    text.height/2
+            highscoreText.draw(
+                    -highscoreText.width/2,
+                    UserScreen.TOP - UserScreen.HEIGHT/5
+            )
+            end()
+        }
+
+    }
+
+    private fun drawGameOver() {
+        batch.apply {
+            begin()
+            glEnableAlpha()
+            gameOverText.draw(
+                    -gameOverText.width/2,
+                    gameOverText.height/2
             )
             end()
         }
     }
 
-    fun handleTouch() {
-        if (timer < MIN_DURATION) return
-        navigateToPlayScreen()
+    private fun draw() {
+        drawHighscore()
+        score.draw()
+        sausage.draw(timer)
+        playButton.draw()
+        drawGameOver()
+        fader.draw()
+        touches.draw()
     }
 
     override fun render(delta: Float) {
@@ -128,12 +180,13 @@ class GameOverScreen(private val game: Game, scoreCount: Int, assets: Assets) : 
 class GameOverScreenInputAdapter(private val screen: GameOverScreen) : InputAdapter() {
     override fun touchDown(x: Int, y: Int, pointer: Int, button: Int): Boolean {
         // your touch down code here
-        screen.handleTouch()
+        screen.handleTouch(x, y)
         return true // return true to indicate the event was handled
     }
 
     override fun touchUp(x: Int, y: Int, pointer: Int, button: Int): Boolean {
         // your touch up code here
+        screen.handleTouchEnd(x, y)
         return true // return true to indicate the event was handled
     }
 }

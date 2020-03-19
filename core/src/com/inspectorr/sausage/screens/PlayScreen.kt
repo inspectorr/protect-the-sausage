@@ -18,20 +18,19 @@ import com.inspectorr.sausage.entities.Sausage
 import com.inspectorr.sausage.ui.Fader
 import com.inspectorr.sausage.ui.FeedbackPoints
 import com.inspectorr.sausage.ui.Score
-import com.inspectorr.sausage.utils.Screen
+import com.inspectorr.sausage.utils.UserScreen
 import com.inspectorr.sausage.utils.distance
 import com.inspectorr.sausage.utils.isOutOfScreen
-import com.inspectorr.sausage.utils.randomFloat
 import kotlin.math.sin
 
 class PlayScreen(private val game: Game, assets: Assets) : ScreenAdapter() {
-    private val camera = OrthographicCamera(Screen.WIDTH, Screen.HEIGHT)
+    private val camera = OrthographicCamera(UserScreen.WIDTH, UserScreen.HEIGHT)
     private val background = Background(camera)
 
     private val sausage = Sausage(camera, assets)
     private val paws = Paws(camera, assets)
     private val score = Score(camera)
-    private val touches = FeedbackPoints(camera, assets)
+    private val touches = FeedbackPoints(camera, assets, silent=false)
     private val fader = Fader(camera)
 
     init {
@@ -107,6 +106,9 @@ class PlayScreen(private val game: Game, assets: Assets) : ScreenAdapter() {
             }
         }
         touches.add(touch.x, touch.y, hit)
+        if (hit) {
+            background.changeColor()
+        }
     }
 
     private fun clear() {

@@ -1,6 +1,5 @@
 package com.inspectorr.sausage.entities
 
-import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.audio.Sound
 import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.graphics.Texture
@@ -9,7 +8,7 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.math.Vector2
 import com.inspectorr.sausage.Assets
 import com.inspectorr.sausage.entities.Sausage.State.*
-import com.inspectorr.sausage.utils.Screen
+import com.inspectorr.sausage.utils.UserScreen
 import com.inspectorr.sausage.utils.animation
 
 const val SAUSAGE_WIDTH = 256
@@ -100,7 +99,7 @@ class Sausage(val camera: OrthographicCamera, assets: Assets) {
     }
 
     var offset = SAUSAGE_WIDTH/16f
-    var scale = Screen.TEXTURE_SCALE
+    var scale = UserScreen.TEXTURE_SCALE
     private val scaledOffset: Float
         get() = scale*(-offset+SAUSAGE_WIDTH/2f)
 

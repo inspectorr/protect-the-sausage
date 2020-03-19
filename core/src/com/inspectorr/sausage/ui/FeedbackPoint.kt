@@ -6,24 +6,29 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.math.Vector2
 import com.inspectorr.sausage.Assets
-import com.inspectorr.sausage.utils.Screen
+import com.inspectorr.sausage.utils.UserScreen
 import com.inspectorr.sausage.utils.generateColor
 import com.inspectorr.sausage.utils.glEnableAlpha
 import java.util.*
 import kotlin.math.pow
 
-class FeedbackPoint(private val point: Vector2, private val shapeRenderer: ShapeRenderer, assets: Assets, hit: Boolean) {
+class FeedbackPoint(
+        private val point: Vector2,
+        private val shapeRenderer: ShapeRenderer,
+        assets: Assets,
+        private val hit: Boolean,
+        private val silent: Boolean
+) {
     private var bzId: Long = 0L
     private var missId: Long = 0L
     private var clapId: Long = 0L
-//    private var hitId: Long
 
     private val feedbackLength = 0.5f
     private val initPointsCount = 70 * Gdx.graphics.density
-    private val initRadius = 25 * Screen.TEXTURE_SCALE
-    private val endRadius = 100 * Screen.TEXTURE_SCALE + initRadius
-    private val minPointSize = 4 * Screen.TEXTURE_SCALE
-    private val maxPointSize = 35 * Screen.TEXTURE_SCALE
+    private val initRadius = 25 * UserScreen.TEXTURE_SCALE
+    private val endRadius = 100 * UserScreen.TEXTURE_SCALE + initRadius
+    private val minPointSize = 4 * UserScreen.TEXTURE_SCALE
+    private val maxPointSize = 35 * UserScreen.TEXTURE_SCALE
 
     private val random = Random()
 
@@ -34,6 +39,12 @@ class FeedbackPoint(private val point: Vector2, private val shapeRenderer: Shape
     // todo wth id dd sdfiajoklgdrg
 
     init {
+        playSounds()
+    }
+
+    private fun playSounds() {
+        if (silent) return
+
         if (hit) {
             clapId = clapSound.play(1.0f)
         } else {
@@ -58,8 +69,7 @@ class FeedbackPoint(private val point: Vector2, private val shapeRenderer: Shape
 
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled)
         glEnableAlpha()
-//        shapeRenderer.color = rgba(255f, 255f, 255f, progress)
-        shapeRenderer.color = generateColor(alpha=progress, min = 0f)
+        shapeRenderer.color = generateColor(alpha=progress, min=0f)
 
 
         val pointsCount = (initPointsCount * progress).toInt()

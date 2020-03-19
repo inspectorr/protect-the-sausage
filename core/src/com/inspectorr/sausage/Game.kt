@@ -15,15 +15,15 @@ enum class Screens {
     GAME_OVER,
 }
 
-val INIT_SCREEN = Screens.PLAY
+val INIT_SCREEN = Screens.GAME_OVER
 
 class Game : ApplicationAdapter() {
     lateinit var screen: ScreenAdapter
-    var isLaunched = false
+    var wasLaunched = false
 
     fun setScreen(name: Screens) {
-        if(isLaunched) screen.dispose()
-        isLaunched = true
+        if (wasLaunched) screen.dispose()
+        wasLaunched = true
         screen = when (name) {
             Screens.PLAY -> PlayScreen(this, assets)
             Screens.GAME_OVER -> GameOverScreen(this, playerScore, assets)
@@ -44,7 +44,6 @@ class Game : ApplicationAdapter() {
     override fun render() {
         if (!assets.areLoaded) return
         assets.update()
-
         val delta = Gdx.graphics.deltaTime
         screen.render(delta)
     }
@@ -63,7 +62,9 @@ class Assets : AssetManager() {
             "paw3.png",
             "sausage_fine_256_1-16.png",
             "sausage_fine-to-screaming_256_1-4.png",
-            "sausage_screaming_256_1-4.png"
+            "sausage_screaming_256_1-4.png",
+            "button-state-start-256.png",
+            "button-state-middle-256.png"
     )
 
     enum class Entities {

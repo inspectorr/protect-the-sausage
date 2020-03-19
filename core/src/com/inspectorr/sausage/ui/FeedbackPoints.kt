@@ -5,7 +5,7 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.math.Vector2
 import com.inspectorr.sausage.Assets
 
-class FeedbackPoints(val camera: OrthographicCamera, val assets: Assets) {
+class FeedbackPoints(val camera: OrthographicCamera, val assets: Assets, val silent: Boolean) {
     private val renderer = ShapeRenderer()
     private var list = mutableListOf<FeedbackPoint>()
 
@@ -15,7 +15,7 @@ class FeedbackPoints(val camera: OrthographicCamera, val assets: Assets) {
 
     fun add(x: Float, y: Float, hit: Boolean) {
         renderer.projectionMatrix = camera.combined
-        list.add(FeedbackPoint(Vector2(x, y), renderer, assets, hit))
+        list.add(FeedbackPoint(Vector2(x, y), renderer, assets, hit, silent))
     }
 
     fun update(delta: Float) {

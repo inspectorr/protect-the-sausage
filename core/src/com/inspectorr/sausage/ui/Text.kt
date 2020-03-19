@@ -51,7 +51,7 @@ class Text(
 //    var borderColor: Color = Color.WHITE
 //    var borderWidth: Float = 0f
 
-    fun update() {
+    private fun update() {
         font.dispose()
         parameter.size = size
         parameter.characters = content

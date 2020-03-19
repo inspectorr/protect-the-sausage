@@ -4,7 +4,7 @@ import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
-import com.inspectorr.sausage.utils.Screen
+import com.inspectorr.sausage.utils.UserScreen
 import com.inspectorr.sausage.utils.rgba
 
 const val INIT_POINTS = 0
@@ -32,7 +32,7 @@ class Score(camera: OrthographicCamera, initPoints: Int = INIT_POINTS) {
         batch.apply {
             begin()
             color = Color.WHITE
-            text.draw(-text.width/2,Screen.TOP - Gdx.graphics.density*50f)
+            text.draw(-text.width/2,UserScreen.TOP - Gdx.graphics.density*50f)
             end()
         }
     }
