@@ -17,15 +17,19 @@ const val RELEASED_TEXTURE_NAME = "button-state-start-256.png"
 class PlayButton(
         private val batch: SpriteBatch,
         assets: Assets,
-        var x: Float = -WIDTH*UserScreen.TEXTURE_SCALE/2f,
-        var y: Float = UserScreen.BOTTOM/3f - HEIGHT*UserScreen.TEXTURE_SCALE/2f,
+//        var x: Float = -WIDTH*UserScreen.TEXTURE_SCALE/2f,
+//        var y: Float = UserScreen.BOTTOM/3f - HEIGHT*UserScreen.TEXTURE_SCALE/2f,
+//        var x: Float = -WIDTH*UserScreen.TEXTURE_SCALE/2,
+//        var y: Float = HEIGHT*UserScreen.TEXTURE_SCALE/2,
+        var x: Float = -WIDTH*UserScreen.TEXTURE_SCALE/2,
+        var y: Float = -HEIGHT*UserScreen.TEXTURE_SCALE/2,
         val onPress: () -> Unit
 ) {
     private var isPressed = false
     private var pressedTextureRegion = TextureRegion(assets.get(PRESSED_TEXTURE_NAME, Texture::class.java))
     private var releasedTextureRegion = TextureRegion(assets.get(RELEASED_TEXTURE_NAME, Texture::class.java))
-
     private val shape = Polygon()
+
     init {
         val initPosition = Vector2(x, y)
         shape.apply {
@@ -42,6 +46,7 @@ class PlayButton(
     }
 
     private fun press() {
+        if (isPressed) return
         isPressed = true
         onPress()
     }
@@ -51,7 +56,6 @@ class PlayButton(
     }
 
     fun handleTouchStart(x: Float, y: Float): Boolean {
-//        if (isPressed) return true
         val isJustPressed = shape.contains(Vector2(x, y))
         if (isJustPressed) {
             press()

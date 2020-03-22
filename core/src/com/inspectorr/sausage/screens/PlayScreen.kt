@@ -21,6 +21,7 @@ import com.inspectorr.sausage.ui.Score
 import com.inspectorr.sausage.utils.UserScreen
 import com.inspectorr.sausage.utils.distance
 import com.inspectorr.sausage.utils.isOutOfScreen
+import com.inspectorr.sausage.utils.vibrate
 import kotlin.math.sin
 
 class PlayScreen(private val game: Game, assets: Assets) : ScreenAdapter() {
@@ -107,8 +108,13 @@ class PlayScreen(private val game: Game, assets: Assets) : ScreenAdapter() {
         }
         touches.add(touch.x, touch.y, hit)
         if (hit) {
-            background.changeColor()
+            onHit()
         }
+    }
+
+    private fun onHit() {
+        background.changeColor()
+        vibrate(100)
     }
 
     private fun clear() {

@@ -31,7 +31,7 @@ class GameOverScreen(private val game: Game, scoreCount: Int, assets: Assets) : 
     private val sound = assets.get("sounds/gameover.mp3", Sound::class.java)
 
     private val gameOverText = Text(batch, "GAME OVER")
-    private var highscoreText : Text
+    private var highscoreText: Text
 
     private val sausage = Sausage(camera, assets)
     private val score = Score(camera, scoreCount)
@@ -70,12 +70,15 @@ class GameOverScreen(private val game: Game, scoreCount: Int, assets: Assets) : 
         batch.projectionMatrix = camera.combined
 
         setHighscore(score.points)
-        highscoreText = Text(batch, "HIGHSCORE: ${getHighscore()}")
-        highscoreText.size = 20
-        highscoreText.parameter.color = Color(1f, 1f, 1f, 1f)
+        highscoreText = Text(batch, "HIGHSCORE: ${getHighscore()}").apply {
+            size = 20
+            parameter.color = Color(1f, 1f, 1f, 1f)
+        }
 
-        gameOverText.size = 40
-        gameOverText.parameter.color = Color(1f, 1f, 1f, startAnimationProgress)
+        gameOverText.apply {
+            size = 40
+            parameter.color = Color(1f, 1f, 1f, startAnimationProgress)
+        }
 
         sausage.apply {
             scale = 0.3f
@@ -112,7 +115,6 @@ class GameOverScreen(private val game: Game, scoreCount: Int, assets: Assets) : 
 
         gameOverText.parameter.color = Color(1f, 1f, 1f, startAnimationProgress)
 
-//        sausage.scream(delta)
         sausage.position.add(-posSpeedPx*delta, 0f)
         sausage.rotation += angleSpeed*delta
 
@@ -147,10 +149,9 @@ class GameOverScreen(private val game: Game, scoreCount: Int, assets: Assets) : 
         batch.apply {
             begin()
             glEnableAlpha()
-            gameOverText.draw(
-                    -gameOverText.width/2,
-                    gameOverText.height/2
-            )
+            gameOverText.apply {
+                draw(-width/2, UserScreen.TOP/3 + height/2)
+            }
             end()
         }
     }
@@ -158,9 +159,9 @@ class GameOverScreen(private val game: Game, scoreCount: Int, assets: Assets) : 
     private fun draw() {
         drawHighscore()
         score.draw()
-        sausage.draw(timer)
         playButton.draw()
         drawGameOver()
+        sausage.draw(timer)
         fader.draw()
         touches.draw()
     }
