@@ -13,6 +13,7 @@ import com.inspectorr.sausage.utils.animation
 
 const val SAUSAGE_WIDTH = 256
 const val SAUSAGE_HEIGHT = 256
+const val DEFAULT_SCREAMING_LEVEL = 0.5f
 
 class Sausage(val camera: OrthographicCamera, assets: Assets) {
     private val batch = SpriteBatch()
@@ -59,8 +60,7 @@ class Sausage(val camera: OrthographicCamera, assets: Assets) {
     private var startScreamSound = assets.get("sounds/scream_start.wav", Sound::class.java)
     private var mainScreamSound = assets.get("sounds/scream_body.wav", Sound::class.java)
 
-//    var screamingLevel = 0f
-    var screamingLevel = 0.25f
+    var screamingLevel = DEFAULT_SCREAMING_LEVEL
 
     var startId = 0L
     private fun playScreamStart() {

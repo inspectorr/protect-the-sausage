@@ -16,7 +16,7 @@
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
             android:value="ca-app-pub-7113401163019527~2083871500"
-            />
+        />
         <activity
             android:name="com.inspectorr.sausage.AndroidLauncher"
             android:label="@string/app_name" 

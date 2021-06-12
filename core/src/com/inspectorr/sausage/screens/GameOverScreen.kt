@@ -17,12 +17,8 @@ import com.inspectorr.sausage.Screens
 import com.inspectorr.sausage.entities.Sausage
 import com.inspectorr.sausage.ui.*
 import com.inspectorr.sausage.utils.*
-import java.util.*
-import kotlin.concurrent.schedule
 
 const val DURATION = 10f
-//const val MIN_DURATION = 0f
-const val MIN_DURATION = 2f
 
 class GameOverScreen(private val game: Game, scoreCount: Int, assets: Assets) : ScreenAdapter() {
     private val camera = OrthographicCamera(UserScreen.WIDTH, UserScreen.HEIGHT)

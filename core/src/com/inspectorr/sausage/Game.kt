@@ -18,8 +18,8 @@ enum class Screens {
 val INIT_SCREEN = Screens.GAME_OVER
 
 class Game : ApplicationAdapter() {
-    lateinit var screen: ScreenAdapter
-    var wasLaunched = false
+    private lateinit var screen: ScreenAdapter
+    private var wasLaunched = false
 
     fun setScreen(name: Screens) {
         if (wasLaunched) screen.dispose()
@@ -36,8 +36,8 @@ class Game : ApplicationAdapter() {
     private val assets = Assets()
 
     override fun create() {
+        // here we can display splash screen
         assets.init()
-        // типа он синхронно загружает пока я там жду в цикле но хз
         setScreen(INIT_SCREEN)
     }
 
@@ -99,7 +99,7 @@ class Assets : AssetManager() {
         }
 
         while (!update()) {
-            // wait)))
+            // wait :)
         }
 
         areLoaded = true
@@ -107,7 +107,4 @@ class Assets : AssetManager() {
         return areLoaded
     }
 
-//    fun getTexture() {
-//        return get()
-//    }
 }

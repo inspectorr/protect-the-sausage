@@ -23,8 +23,8 @@ class FeedbackPoint(
     private var missId: Long = 0L
     private var clapId: Long = 0L
 
-//    private val feedbackLength = 0.75f
-    private val feedbackLength = 10f
+    private val feedbackLength = 0.75f
+//    private val feedbackLength = 10f
     private val initPointsCount = 50 * Gdx.graphics.density
     private val initRadius = 25 * UserScreen.TEXTURE_SCALE
     private val endRadius = 175 * UserScreen.TEXTURE_SCALE + initRadius
